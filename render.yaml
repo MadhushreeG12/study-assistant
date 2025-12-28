@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: ai-study-assistant
+    env: docker
+    plan: free
+    region: oregon
+    buildCommand: "" 
+    startCommand: "" 
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: GROQ_API_KEY
+        sync: false # You will need to enter this in the Render dashboard

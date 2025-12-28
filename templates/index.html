@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ExplainIT AI (DEBUG MODE) - Smart Summarization</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #E8D5F2 0%, #DCD1E8 50%, #C9B8E0 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    /* Main Glass Container */
+    .main-container {
+      display: flex;
+      width: 100%;
+      max-width: 1400px;
+      height: 90vh;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 30px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+      border: 4px solid #6B5B95;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: linear-gradient(180deg, #6B7BC4 0%, #5D6BA8 100%);
+      padding: 30px 20px;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 40px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-label {
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 1px;
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 10px;
+    }
+
+    .history-list {
+      flex: 1;
+      overflow-y: auto;
+      margin-right: -10px;
+      padding-right: 10px;
+    }
+
+    .history-item {
+      padding: 12px 15px;
+      border-radius: 12px;
+      color: rgba(255, 255, 255, 0.9);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 5px;
+    }
+
+    .history-item:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      transform: translateX(5px);
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      background: #F8F9FA;
+      padding: 40px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      color: #5D6BA8;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      background: white;
+      padding: 8px 15px;
+      border-radius: 50px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .user-avatar {
+      width: 35px;
+      height: 35px;
+      background: linear-gradient(135deg, #6B7BC4, #A17BC4);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+    }
+
+    /* Course Cards Grid */
+    .courses-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .course-card {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      display: flex;
+      align-items: center;
+      gap: 30px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .course-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .course-card.purple-bg {
+      background: linear-gradient(135deg, #F3EFFF 0%, #E8E0FF 100%);
+    }
+
+    .course-card.pink-bg {
+      background: linear-gradient(135deg, #FFE8F0 0%, #FFE0EB 100%);
+    }
+
+    .course-card.blue-bg {
+      background: linear-gradient(135deg, #E0F1FF 0%, #D2E9FF 100%);
+    }
+
+    .course-icon {
+      font-size: 3rem;
+      width: 80px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: 20px;
+      flex-shrink: 0;
+    }
+
+    .course-details {
+      flex: 1;
+    }
+
+    .course-title {
+      font-weight: 700;
+      color: #444;
+      margin-bottom: 5px;
+    }
+
+    .course-description {
+      color: #666;
+      font-size: 0.9rem;
+      margin-bottom: 15px;
+    }
+
+    /* Buttons & Inputs */
+    .btn-submit {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: 500;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      color: white;
+    }
+
+    .btn-logout {
+      color: #dc3545;
+      border: 1px solid #dc3545;
+      background: transparent;
+      padding: 6px 15px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+
+    .btn-logout:hover {
+      background: #dc3545;
+      color: white;
+    }
+
+    /* Upload Box */
+    .upload-box {
+      border: 2px dashed #6B7BC4;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 15px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      width: 100%;
+      height: 100px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+
+    .upload-box:hover {
+      background: rgba(255, 255, 255, 0.8);
+      border-color: #5D6BA8;
+    }
+
+    /* Input styling */
+    .form-control {
+      border-radius: 10px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      padding: 10px 15px;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 3px;
+    }
+
+    /* Loading Overlay */
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(107, 91, 149, 0.85);
+      backdrop-filter: blur(5px);
+      z-index: 9999;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: white;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="spinner-border text-light" role="status" style="width: 4rem; height: 4rem;">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <h2 class="mt-4 fw-bold">Processing Content</h2>
+    <p class="mt-2 text-white-50">Please wait while our AI generates your summary...</p>
+  </div>
+
+  <div class="main-container">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="logo">
+        <i class="fas fa-book-open"></i> ExplainIT AI
+      </div>
+
+      <div class="nav-label">Your History</div>
+      <!-- History list populated via JS -->
+      <div id="historyList" class="history-list">
+        <!-- Items go here -->
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      {% for category, message in messages %}
+      <div
+        class="alert alert-{{ 'success' if category == 'success' else 'danger' if category == 'danger' else 'info' }} alert-dismissible fade show rounded-3 shadow-sm mb-4"
+        role="alert" style="border:none;">
+        <i
+          class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' if category == 'danger' else 'info-circle' }} me-2"></i>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      {% endfor %}
+      {% endif %}
+      {% endwith %}
+
+      <!-- Header -->
+      <div class="header">
+        <h1>My Courses</h1>
+        <div class="header-right">
+          <div class="user-profile">
+            <div class="user-avatar">
+              <i class="fas fa-user"></i>
+            </div>
+            <span style="font-weight: 600; color: #555;">{{ user_name.split('@')[0] if user_name else 'User' }}</span>
+            <a href="/logout" class="btn-logout"><i class="fas fa-sign-out-alt me-1"></i> Logout</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Features Grid -->
+      <div class="courses-grid">
+
+        <!-- PDF Card -->
+        <div class="course-card purple-bg">
+          <div class="course-icon">
+            <i class="fas fa-file-pdf" style="color: #6B5B95;"></i>
+          </div>
+          <div class="course-details">
+            <h3 class="course-title">PDF Summarization</h3>
+            <p class="course-description">Upload documents for instant comprehensive summaries.</p>
+            <form action="/pdf" method="POST" enctype="multipart/form-data" class="d-flex gap-3 align-items-center">
+              <input type="file" name="file" accept=".pdf" class="form-control" style="max-width: 300px;" required>
+              <button class="btn-submit">Summarize</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- YouTube Card -->
+        <div class="course-card pink-bg">
+          <div class="course-icon">
+            <i class="fas fa-youtube" style="color: #c4302b;"></i>
+          </div>
+          <div class="course-details">
+            <h3 class="course-title">YouTube Summarization</h3>
+            <p class="course-description">Paste a video link to get a quick textual recap.</p>
+            <form action="/youtube" method="POST" class="d-flex gap-3 mt-2">
+              <input type="text" name="youtube_url" placeholder="Paste YouTube URL here..." class="form-control"
+                style="flex:1;" required>
+              <button class="btn-submit">Summarize</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Video Upload Card -->
+        <div class="course-card blue-bg">
+          <div class="course-icon">
+            <i class="fas fa-video" style="color: #007bff;"></i>
+          </div>
+          <div class="course-details">
+            <h3 class="course-title">Video File Summarization</h3>
+            <p class="course-description">Upload an MP4 file to extract notes and Audio.</p>
+
+            <form action="/video_upload" method="POST" enctype="multipart/form-data">
+              <div class="d-flex gap-3 align-items-center">
+                <label class="upload-box" id="dropArea" style="flex: 1;">
+                  <i class="fas fa-cloud-upload-alt fa-2x mb-2" style="color: #6B7BC4;"></i>
+                  <span id="uploadText" style="color: #555; font-size: 0.9rem;">Drag & Drop MP4 or Click to
+                    Upload</span>
+                  <input type="file" name="video_file" id="videoInput" accept="video/mp4" hidden required>
+                </label>
+                <button class="btn-submit" style="height: 50px; padding: 0 30px;">Summarize</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Show Loading Overlay on any form submit
+    document.querySelectorAll('form').forEach(form => {
+      form.addEventListener('submit', function () {
+        // Only show if the form is valid (if using constrain validation)
+        // Basic check: if it submits, show overlay
+        document.getElementById('loadingOverlay').style.display = 'flex';
+      });
+    });
+
+    // Logic for Drag & Drop
+    const dropArea = document.getElementById("dropArea");
+    const videoInput = document.getElementById("videoInput");
+    const uploadText = document.getElementById("uploadText");
+
+    if (dropArea) {
+      dropArea.addEventListener("click", () => videoInput.click());
+
+      videoInput.addEventListener("change", () => {
+        if (videoInput.files.length > 0) {
+          uploadText.textContent = videoInput.files[0].name;
+          dropArea.style.borderColor = "#28a745";
+          dropArea.style.background = "rgba(40, 167, 69, 0.1)";
+        }
+      });
+
+      dropArea.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropArea.style.background = "rgba(107, 123, 196, 0.2)";
+      });
+
+      dropArea.addEventListener("dragleave", () => {
+        dropArea.style.background = "rgba(255,255,255,0.5)";
+      });
+
+      dropArea.addEventListener("drop", (e) => {
+        e.preventDefault();
+        videoInput.files = e.dataTransfer.files;
+        if (videoInput.files.length > 0) {
+          uploadText.textContent = videoInput.files[0].name;
+          dropArea.style.borderColor = "#28a745";
+          dropArea.style.background = "rgba(40, 167, 69, 0.1)";
+        }
+      });
+    }
+
+    // History Loading
+    function loadHistory() {
+      fetch("/history")
+        .then((r) => r.json())
+        .then((data) => {
+          const list = document.getElementById("historyList");
+          list.innerHTML = "";
+          if (!data.history || data.history.length === 0) {
+            list.innerHTML = "<div style='color: rgba(255,255,255,0.5); font-size: 0.9rem; margin-top: 10px;'>No history yet.</div>";
+            return;
+          }
+          data.history.forEach((item) => {
+            let div = document.createElement("div");
+            div.className = "history-item";
+            div.innerHTML = `<i class="fas fa-${item.type === 'pdf' ? 'file-pdf' : item.type === 'video' ? 'video' : 'youtube'} me-2"></i> ${item.title}`;
+            div.title = item.title;
+            div.onclick = () => (window.location.href = "/history/" + item.id);
+            list.appendChild(div);
+          });
+        })
+        .catch(console.error);
+    }
+    window.onload = loadHistory;
+  </script>
+
+</body>
+
+</html>

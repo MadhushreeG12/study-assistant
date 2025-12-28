@@ -1,0 +1,14 @@
+requests
+flask
+pdfplumber
+pytesseract
+pdf2image
+groq
+youtube_transcript_api
+yt_dlp
+scikit-learn
+rouge_score
+flask-sqlalchemy
+pyttsx3
+moviepy<2.0
+gunicorn
