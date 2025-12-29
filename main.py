@@ -464,7 +464,7 @@ def download_audio_from_youtube(youtube_url):
     # Build command: python -m yt_dlp -f ... -o ... url
     cmd = [
         sys.executable, "-m", "yt_dlp",
-        "-f", "bestaudio[abr<=64]/bestaudio/best",
+        "-f", "bestaudio/best",
         "-o", outname,
         "--extractor-args", "youtube:player_client=android",
         "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
