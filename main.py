@@ -466,7 +466,7 @@ def download_audio_from_youtube(youtube_url):
         sys.executable, "-m", "yt_dlp",
         "-x", "--audio-format", "mp3",
         "-o", outname,
-        "--extractor-args", "youtube:player_client=tv",
+        "--extractor-args", "youtube:player_client=android_creator",
         "--no-check-certificate",
         "--no-warnings",
         "--quiet",
