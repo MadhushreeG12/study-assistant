@@ -1250,3 +1250,54 @@ ERROR: Failed to decrypt with DPAPI. See  https://github.com/yt-dlp/yt-dlp/issue
 [2025-12-28 21:44:23] Full summary generated. Length: 21624
 [2025-12-28 21:45:03] Metrics evaluated.
 [2025-12-28 21:45:13] TTS Audio generated: summary_TXNGXxPVh4A.mp3
+[2025-12-29 09:26:32] Logger initialized.
+[2025-12-29 09:26:32] FFmpeg found in path.
+[2025-12-29 09:26:36] Logger initialized.
+[2025-12-29 09:26:36] FFmpeg found in path.
+[2025-12-29 09:27:19] Processing YouTube Video: Ro_MScTDfU4
+[2025-12-29 09:27:19] Attempting YouTube transcript API for Ro_MScTDfU4
+[2025-12-29 09:27:19] Official transcript failed: type object 'YouTubeTranscriptApi' has no attribute 'get_transcript'
+[2025-12-29 09:27:19] Falling back to audio download...
+[2025-12-29 09:27:19] Starting download for https://youtu.be/Ro_MScTDfU4?si=Qg5T-kzkYDlEzUSa -> yt_211563d3da764054ac1ce5d7cb2bc5de.m4a
+[2025-12-29 09:27:19] Running command: C:\Program Files\Python312\python.exe -m yt_dlp -f bestaudio[abr<=64]/bestaudio/best -o yt_211563d3da764054ac1ce5d7cb2bc5de.m4a --no-check-certificate --user-agent Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 --no-warnings --quiet https://youtu.be/Ro_MScTDfU4?si=Qg5T-kzkYDlEzUSa
+[2025-12-29 09:27:29] Download success: yt_211563d3da764054ac1ce5d7cb2bc5de.m4a - Size: 11677125 bytes
+[2025-12-29 09:27:29] Audio downloaded: yt_211563d3da764054ac1ce5d7cb2bc5de.m4a
+[2025-12-29 09:28:13] Transcript generated length: 30880
+[2025-12-29 09:28:13] Rate limit hit (429). Retrying in 10s...
+[2025-12-29 09:28:15] Chunk 2/3 summary done. Length: 5334
+[2025-12-29 09:28:15] Chunk 1/3 summary done. Length: 6215
+[2025-12-29 09:28:23] Rate limit hit (429). Retrying in 20s...
+[2025-12-29 09:28:45] Chunk 3/3 summary done. Length: 5218
+[2025-12-29 09:28:45] Full summary generated. Length: 16771
+[2025-12-29 09:28:54] Metrics evaluated.
+[2025-12-29 09:29:00] TTS Audio generated: summary_Ro_MScTDfU4.mp3
+[2025-12-29 12:11:26] Logger initialized.
+[2025-12-29 12:11:26] FFmpeg found in path.
+[2025-12-29 12:11:29] Logger initialized.
+[2025-12-29 12:11:29] FFmpeg found in path.
+[2025-12-29 12:14:08] Processing YouTube Video: kqtD5dpn9C8
+[2025-12-29 12:14:08] Attempting YouTube transcript API for kqtD5dpn9C8
+[2025-12-29 12:14:08] Official transcript failed: type object 'YouTubeTranscriptApi' has no attribute 'get_transcript'
+[2025-12-29 12:14:08] Falling back to audio download...
+[2025-12-29 12:14:08] Starting download for https://youtu.be/kqtD5dpn9C8?si=KwBp1kzzzTLuq8m4 -> yt_869c5e7329be4c19bbc304976598c9db.m4a
+[2025-12-29 12:14:08] Running command: C:\Program Files\Python312\python.exe -m yt_dlp -f bestaudio[abr<=64]/bestaudio/best -o yt_869c5e7329be4c19bbc304976598c9db.m4a --extractor-args youtube:player_client=android --user-agent Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 --no-check-certificate --no-warnings --quiet https://youtu.be/kqtD5dpn9C8?si=KwBp1kzzzTLuq8m4
+[2025-12-29 12:14:33] Download success: yt_869c5e7329be4c19bbc304976598c9db.m4a - Size: 71923246 bytes
+[2025-12-29 12:14:33] Audio downloaded: yt_869c5e7329be4c19bbc304976598c9db.m4a
+[2025-12-29 12:19:59] Transcript generated length: 50958
+[2025-12-29 12:19:59] Rate limit hit (429). Retrying in 10s...
+[2025-12-29 12:20:01] Chunk 3/5 summary done. Length: 3751
+[2025-12-29 12:20:01] Chunk 1/5 summary done. Length: 4567
+[2025-12-29 12:20:01] Rate limit hit (429). Retrying in 10s...
+[2025-12-29 12:20:01] Rate limit hit (429). Retrying in 10s...
+[2025-12-29 12:20:09] Rate limit hit (429). Retrying in 20s...
+[2025-12-29 12:20:11] Rate limit hit (429). Retrying in 20s...
+[2025-12-29 12:20:12] Chunk 5/5 summary done. Length: 3010
+[2025-12-29 12:20:29] Rate limit hit (429). Retrying in 30s...
+[2025-12-29 12:20:31] Rate limit hit (429). Retrying in 30s...
+[2025-12-29 12:20:59] Chunk 2/5 summary done. Length: 42
+[2025-12-29 12:21:01] Chunk 4/5 summary done. Length: 42
+[2025-12-29 12:21:01] Full summary generated. Length: 11420
+[2025-12-29 12:21:12] Metrics evaluated.
+[2025-12-29 12:21:16] TTS Audio generated: summary_kqtD5dpn9C8.mp3
+[2025-12-29 12:32:35] Logger initialized.
+[2025-12-29 12:32:35] FFmpeg found in path.

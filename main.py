@@ -474,30 +474,39 @@ def download_audio_from_youtube(youtube_url):
         youtube_url
     ]
 
+    # [CLOUD FIX] Check for cookies.txt to bypass IP blocks (Render/AWS/Azure)
+    if os.path.exists("cookies.txt"):
+        log_debug("Found cookies.txt! Appending to yt-dlp command.")
+        # Insert before the URL (last argument)
+        cmd.insert(-1, "--cookies")
+        cmd.insert(-1, "cookies.txt")
+    else:
+        log_debug("WARNING: cookies.txt NOT found. Download may fail on cloud servers.")
+
     try:
         log_debug(f"Running command: {' '.join(cmd)}")
         result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        
+
         if result.returncode != 0:
             log_debug(f"yt-dlp failed with code {result.returncode}")
             log_debug(f"STDERR: {result.stderr}")
             print(f"yt-dlp stderr: {result.stderr}")
-            return None
+            # Return None and the error message
+            return None, result.stderr
             
         if os.path.exists(outname):
             log_debug(f"Download success: {outname} - Size: {os.path.getsize(outname)} bytes")
-            return outname
+            return outname, None
         else:
             log_debug("yt-dlp successfully finished but file not found.")
-            print(f"yt-dlp finished but {outname} not found. Stderr: {result.stderr}")
-            return None
+            return None, f"File not found after download. Stderr: {result.stderr}"
 
     except Exception as e:
         print("download_audio_from_youtube error:", e)
         import traceback
         traceback.print_exc()
         log_debug(f"download_audio_from_youtube error: {e}")
-        return None
+        return None, str(e)
 
 # ---------------- FLASHCARDS ----------------
 def generate_flashcards(summary):
@@ -773,7 +782,7 @@ def youtube_summary():
             log_debug(f"Official transcript failed: {e}")
             # Fallback to downloading audio & transcribing
             log_debug("Falling back to audio download...")
-            audio_file = download_audio_from_youtube(youtube_url)
+            audio_file, error_msg = download_audio_from_youtube(youtube_url)
             if audio_file:
                 log_debug(f"Audio downloaded: {audio_file}")
                 # Use process_large_audio to handle long durations (chunking)
@@ -787,9 +796,10 @@ def youtube_summary():
                 except Exception:
                     pass
             else:
-                 error_msg = "Failed to download audio file. Check logs."
-                 log_debug(error_msg)
-                 flash(error_msg) # Flash the specific error
+                 # SHOW THE ACTUAL ERROR to the user
+                 full_error = f"Download failed: {error_msg}"
+                 log_debug(full_error)
+                 flash(full_error[:200]) # Cap length to avoid massive flash messages
                  return redirect("/starter")
 
         if not transcript or "[ERROR:" in transcript:
