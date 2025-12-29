@@ -4,7 +4,10 @@ import re
 import requests
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from werkzeug.utils import secure_filename
+from dotenv import load_dotenv
 import pdfplumber
+
+load_dotenv() # Load environment variables from .env file
 import pytesseract
 from pdf2image import convert_from_path
 from groq import Groq
@@ -463,8 +466,9 @@ def download_audio_from_youtube(youtube_url):
         sys.executable, "-m", "yt_dlp",
         "-f", "bestaudio[abr<=64]/bestaudio/best",
         "-o", outname,
+        "--extractor-args", "youtube:player_client=android",
+        "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         "--no-check-certificate",
-        "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
         "--no-warnings",
         "--quiet",
         youtube_url
