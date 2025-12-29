@@ -38,4 +38,4 @@ RUN mkdir -p uploads static/audio
 
 # Expose the port the app runs on (Render sets $PORT, default Flask is 5000)
 # We will use gunicorn to bind to the environment's PORT
-CMD gunicorn main:app --bind 0.0.0.0:$PORT
+CMD gunicorn main:app --bind 0.0.0.0:$PORT --timeout 120
