@@ -462,27 +462,18 @@ def download_audio_from_youtube(youtube_url):
     outname = f"yt_{uuid.uuid4().hex}.mp3"
     log_debug(f"Starting download for {youtube_url} -> {outname}")
 
-    # Build command: python -m yt_dlp -x --audio-format mp3 ...
     cmd = [
         sys.executable, "-m", "yt_dlp",
         "-x", "--audio-format", "mp3",
         "-o", outname,
-        "-o", outname,
-        "--extractor-args", "youtube:player_client=ios",
+        "--extractor-args", "youtube:player_client=tv",
         "--no-check-certificate",
         "--no-warnings",
         "--quiet",
         youtube_url
     ]
 
-    # [CLOUD FIX] Check for cookies.txt to bypass IP blocks (Render/AWS/Azure)
-    if os.path.exists("cookies.txt"):
-        log_debug("Found cookies.txt! Appending to yt-dlp command.")
-        # Insert before the URL (last argument)
-        cmd.insert(-1, "--cookies")
-        cmd.insert(-1, "cookies.txt")
-    else:
-        log_debug("WARNING: cookies.txt NOT found. Download may fail on cloud servers.")
+    # [CLOUD FIX] Removed cookies.txt usage to avoid Geo-Lock/IP Mismatch issues
 
     try:
         log_debug(f"Running command: {' '.join(cmd)}")
