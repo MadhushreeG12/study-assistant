@@ -458,13 +458,14 @@ def download_audio_from_youtube(youtube_url):
     import sys
     
     # Use unique name to prevent collisions/overwrites
-    outname = f"yt_{uuid.uuid4().hex}.m4a"
+    # Use .mp3 extension and -x flag to auto-convert whatever is downloaded
+    outname = f"yt_{uuid.uuid4().hex}.mp3"
     log_debug(f"Starting download for {youtube_url} -> {outname}")
 
-    # Build command: python -m yt_dlp -f ... -o ... url
+    # Build command: python -m yt_dlp -x --audio-format mp3 ...
     cmd = [
         sys.executable, "-m", "yt_dlp",
-        "-f", "bestaudio/best",
+        "-x", "--audio-format", "mp3",
         "-o", outname,
         "--extractor-args", "youtube:player_client=android",
         "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
