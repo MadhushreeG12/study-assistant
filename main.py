@@ -38,7 +38,9 @@ app.secret_key = "explainitai"
 db = SQLAlchemy(app)
 
 # ---------------- API KEYS ----------------
-GROQ_API_KEY = os.getenv("GROQ_API_KEY", "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")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+if not GROQ_API_KEY:
+    print("WARNING: GROQ_API_KEY not set!")
 client = Groq(api_key=GROQ_API_KEY)
 
 GROQ_ASR_URL = "https://api.groq.com/openai/v1/audio/transcriptions"

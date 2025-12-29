@@ -37,4 +37,4 @@ static/audio/
 *.log
 
 # Docker
-.dockerignore
+
