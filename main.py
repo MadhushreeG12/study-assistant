@@ -519,6 +519,8 @@ def get_transcript_via_ytdlp(video_id):
         "--output", base_name,
         "--quiet",
         "--no-warnings",
+        "--extractor-args", "youtube:player_client=android",
+        "--user-agent", "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36",
         url
     ]
 
