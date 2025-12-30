@@ -505,12 +505,10 @@ def get_transcript_via_ytdlp(video_id):
     """Fallback: Use yt-dlp to download subtitles (vtt) and parse them."""
     import uuid
     import glob
+    import os
     
     url = f"https://www.youtube.com/watch?v={video_id}"
     base_name = f"sub_{uuid.uuid4().hex}"
-    
-    # Try multiple languages: manual en, auto en, then others?
-    # yt-dlp --write-auto-sub --skip-download --sub-lang en --output ...
     
     cmd = [
         sys.executable, "-m", "yt_dlp",
@@ -523,16 +521,28 @@ def get_transcript_via_ytdlp(video_id):
         "--no-warnings",
         url
     ]
+
+    # [Added] Use cookies.txt if it exists to bypass bot detection
+    if os.path.exists("cookies.txt"):
+        cmd.insert(-1, "--cookies")
+        cmd.insert(-1, "cookies.txt")
+        log_debug("Using cookies.txt for yt-dlp")
     
     try:
         log_debug(f"Running yt-dlp subtitle fetch: {' '.join(cmd)}")
-        subprocess.run(cmd, check=True)
+        # Capture stderr to see why it fails
+        result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        
+        if result.returncode != 0:
+            err = result.stderr or "Unknown error"
+            log_debug(f"yt-dlp failed (code {result.returncode}): {err}")
+            return f"[ERROR: yt-dlp failed: {err}]"
         
         # Find the file (might be .en.vtt, .vtt, etc)
         vtt_files = glob.glob(f"{base_name}*.vtt")
         if not vtt_files:
-            log_debug("yt-dlp finished but no VTT file found.")
-            return None
+            log_debug(f"yt-dlp finished but no VTT file found. Stderr: {result.stderr}")
+            return f"[ERROR: No subtitle file created. {result.stderr}]"
             
         vtt_path = vtt_files[0]
         log_debug(f"Parsing VTT: {vtt_path}")
@@ -545,11 +555,14 @@ def get_transcript_via_ytdlp(video_id):
         except:
             pass
             
+        if not text:
+             return "[ERROR: Empty transcript extracted]"
+             
         return text
 
     except Exception as e:
         log_debug(f"yt-dlp subtitle fallback failed: {e}")
-        return None
+        return f"[ERROR: Fallback Exception: {str(e)}]"
 
 def parse_vtt(vtt_path):
     """Simple parser to extract text from VTT file."""
