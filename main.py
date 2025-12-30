@@ -457,7 +457,12 @@ def get_transcript(video_id):
     3. Try translating ANY available transcript to English
     """
     try:
-        transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+        # [Added] Use cookies for primary API if available
+        cookies_file = "cookies.txt" if os.path.exists("cookies.txt") else None
+        if cookies_file:
+             log_debug(f"Using cookies.txt for youtube_transcript_api")
+             
+        transcript_list = YouTubeTranscriptApi.list_transcripts(video_id, cookies=cookies_file)
         
         transcript = None
         
@@ -519,6 +524,7 @@ def get_transcript_via_ytdlp(video_id):
         "--output", base_name,
         "--quiet",
         "--no-warnings",
+        "--force-ipv4", # Reduce blocking
         "--extractor-args", "youtube:player_client=android",
         "--user-agent", "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36",
         url
