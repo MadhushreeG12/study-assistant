@@ -13,6 +13,7 @@ from pdf2image import convert_from_path
 from groq import Groq
 from youtube_transcript_api import YouTubeTranscriptApi
 from urllib.parse import urlparse, parse_qs
+import sys
 import yt_dlp
 from flask_sqlalchemy import SQLAlchemy
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -449,9 +450,156 @@ def extract_video_id(youtube_url):
     return None
 
 def get_transcript(video_id):
-    """Try official transcript via youtube_transcript_api; raises if not available."""
-    transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['en'])
-    return " ".join([entry['text'] for entry in transcript])
+    """
+    Robust transcript fetching:
+    1. Try Manual English
+    2. Try Auto-generated English
+    3. Try translating ANY available transcript to English
+    """
+    try:
+        transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+        
+        transcript = None
+        
+        # Strategy 1: Manual English
+        try:
+            transcript = transcript_list.find_manually_created_transcript(['en'])
+            log_debug("Found Manual English transcript.")
+        except:
+            pass
+
+        # Strategy 2: Generated English
+        if not transcript:
+            try:
+                transcript = transcript_list.find_generated_transcript(['en'])
+                log_debug("Found Auto-generated English transcript.")
+            except:
+                pass
+
+        # Strategy 3: Any language -> Translate to English
+        if not transcript:
+            try:
+                # Just get the first available one (usually the primary language)
+                for t in transcript_list:
+                    transcript = t
+                    break
+                
+                if transcript:
+                    log_debug(f"Found foreign transcript ({transcript.language}). Translating to English...")
+                    transcript = transcript.translate('en')
+            except Exception as e:
+                log_debug(f"Translation fallback failed: {e}")
+                pass
+
+        if transcript:
+            data = transcript.fetch()
+            return " ".join([entry['text'] for entry in data])
+        
+        return None
+
+    except Exception as e:
+        log_debug(f"youtube_transcript_api failed: {e}. Trying yt-dlp fallback...")
+        return get_transcript_via_ytdlp(video_id)
+
+def get_transcript_via_ytdlp(video_id):
+    """Fallback: Use yt-dlp to download subtitles (vtt) and parse them."""
+    import uuid
+    import glob
+    
+    url = f"https://www.youtube.com/watch?v={video_id}"
+    base_name = f"sub_{uuid.uuid4().hex}"
+    
+    # Try multiple languages: manual en, auto en, then others?
+    # yt-dlp --write-auto-sub --skip-download --sub-lang en --output ...
+    
+    cmd = [
+        sys.executable, "-m", "yt_dlp",
+        "--write-auto-sub",
+        "--write-sub",
+        "--sub-lang", "en",
+        "--skip-download",
+        "--output", base_name,
+        "--quiet",
+        "--no-warnings",
+        url
+    ]
+    
+    try:
+        log_debug(f"Running yt-dlp subtitle fetch: {' '.join(cmd)}")
+        subprocess.run(cmd, check=True)
+        
+        # Find the file (might be .en.vtt, .vtt, etc)
+        vtt_files = glob.glob(f"{base_name}*.vtt")
+        if not vtt_files:
+            log_debug("yt-dlp finished but no VTT file found.")
+            return None
+            
+        vtt_path = vtt_files[0]
+        log_debug(f"Parsing VTT: {vtt_path}")
+        
+        text = parse_vtt(vtt_path)
+        
+        # Cleanup
+        try:
+            os.remove(vtt_path)
+        except:
+            pass
+            
+        return text
+
+    except Exception as e:
+        log_debug(f"yt-dlp subtitle fallback failed: {e}")
+        return None
+
+def parse_vtt(vtt_path):
+    """Simple parser to extract text from VTT file."""
+    lines = []
+    seen = set()
+    try:
+        with open(vtt_path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                # Skip headers, timestamps, empty lines
+                if not line: continue
+                if "WEBVTT" in line: continue
+                if "-->" in line: continue
+                if line.isdigit(): continue # rare sequence numbers
+                
+                # Deduplicate sequential lines (captions often repeat)
+                if line in seen: continue
+                
+                # Small buffer to avoid massive deduplication issues? 
+                # Actually, simple dedupe is okay for summaries.
+                # Better: only checking immediate previous is usually enough, but set is fine for now.
+                # CAUTION: Set deduplicates GLOBALLY. This breaks the story order if a phrase repeats correctly.
+                # Let's use last_line check.
+                pass
+                
+        # Re-read for better logic
+        return parse_vtt_content(vtt_path)
+    except:
+       return ""
+
+def parse_vtt_content(vtt_path):
+    text_blocks = []
+    last_line = ""
+    with open(vtt_path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line: continue
+            if "WEBVTT" in line: continue
+            if "-->" in line: continue
+            if re.match(r'^\d+$', line): continue # sequence numbers like 1, 2, 3
+            
+            # Remove HTML tags like <c.colorE5E5E5> or <00:00:15.500>
+            line = re.sub(r'<[^>]+>', '', line)
+            
+            # Simple dedup of consecutive lines
+            if line != last_line:
+                text_blocks.append(line)
+                last_line = line
+                
+    return " ".join(text_blocks)
 
 def download_audio_from_youtube(youtube_url):
     """Download best audio using yt_dlp and return local filename, or None on failure."""
