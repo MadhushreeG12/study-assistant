@@ -524,9 +524,12 @@ def get_transcript_via_ytdlp(video_id):
 
     # [Added] Use cookies.txt if it exists to bypass bot detection
     if os.path.exists("cookies.txt"):
+        size = os.path.getsize("cookies.txt")
+        log_debug(f"Using cookies.txt (Size: {size} bytes)")
         cmd.insert(-1, "--cookies")
         cmd.insert(-1, "cookies.txt")
-        log_debug("Using cookies.txt for yt-dlp")
+    else:
+        log_debug("WARNING: cookies.txt NOT found in CWD.")
     
     try:
         log_debug(f"Running yt-dlp subtitle fetch: {' '.join(cmd)}")
