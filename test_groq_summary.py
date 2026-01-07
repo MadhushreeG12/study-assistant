@@ -2,12 +2,15 @@
 import os
 import requests
 import time
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Use the key from main.py or env
-GROQ_API_KEY = os.getenv("GROQ_API_KEY", "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")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 GROQ_CHAT_URL = "https://api.groq.com/openai/v1/chat/completions"
 
-def summarize_with_groq(text, system_prompt, model="llama-3.1-8b-instant", max_tokens=700):
+def summarize_with_groq(text, system_prompt, model="llama-3.3-70b-versatile", max_tokens=1000):
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
     user_content = text + "\n\n(IMPORTANT: Please provide the response in English ONLY, regardless of the original language of the text above.)"
     
