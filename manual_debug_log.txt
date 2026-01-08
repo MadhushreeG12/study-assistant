@@ -475,3 +475,64 @@
 [2026-01-04 20:51:20] FFmpeg found in path.
 [2026-01-04 20:51:33] Logger initialized.
 [2026-01-04 20:51:33] FFmpeg found in path.
+[2026-01-08 17:48:14] Logger initialized.
+[2026-01-08 17:48:14] FFmpeg found in path.
+[2026-01-08 17:48:18] Logger initialized.
+[2026-01-08 17:48:18] FFmpeg found in path.
+[2026-01-08 17:53:22] Processing YouTube Video: kqtD5dpn9C8
+[2026-01-08 17:53:22] Attempting YouTube transcript API for kqtD5dpn9C8
+[2026-01-08 17:53:24] Official transcript failed: no element found: line 1, column 0
+[2026-01-08 17:53:24] Falling back to audio download...
+[2026-01-08 17:53:24] Starting download for https://youtu.be/kqtD5dpn9C8?si=0BBIRtEm7ITpZ7C_ -> yt_f336db0e588543b2983bce93ddc4fdf0.mp3
+[2026-01-08 17:53:24] Running command: C:\Program Files\Python312\python.exe -m yt_dlp -x --audio-format mp3 -o yt_f336db0e588543b2983bce93ddc4fdf0.mp3 --extractor-args youtube:player_client=android_creator --no-check-certificate --no-warnings --quiet https://youtu.be/kqtD5dpn9C8?si=0BBIRtEm7ITpZ7C_
+[2026-01-08 17:55:07] Download success: yt_f336db0e588543b2983bce93ddc4fdf0.mp3 - Size: 34476716 bytes
+[2026-01-08 17:55:07] Audio downloaded: yt_f336db0e588543b2983bce93ddc4fdf0.mp3
+[2026-01-08 17:58:18] Transcript generated length: 33712
+[2026-01-08 17:58:28] Full summary generated. Length: 5785
+[2026-01-08 17:58:31] Metrics evaluated.
+[2026-01-08 17:58:33] TTS Audio generated: summary_kqtD5dpn9C8.mp3
+[2026-01-08 18:14:19] Logger initialized.
+[2026-01-08 18:14:19] FFmpeg found in path.
+[2026-01-08 18:14:42] Logger initialized.
+[2026-01-08 18:14:42] FFmpeg found in path.
+[2026-01-08 19:13:21] Logger initialized.
+[2026-01-08 19:13:21] FFmpeg found in path.
+[2026-01-08 19:13:31] Logger initialized.
+[2026-01-08 19:13:31] FFmpeg found in path.
+[2026-01-08 19:13:45] Logger initialized.
+[2026-01-08 19:13:45] FFmpeg found in path.
+[2026-01-08 19:13:54] Logger initialized.
+[2026-01-08 19:13:54] FFmpeg found in path.
+[2026-01-08 19:14:00] Logger initialized.
+[2026-01-08 19:14:00] FFmpeg found in path.
+[2026-01-08 19:14:39] Logger initialized.
+[2026-01-08 19:14:39] FFmpeg found in path.
+[2026-01-08 19:14:40] Stream copy failed, re-encoding. Error: b'[ipod @ 0000029ed6c03bc0] Could not find tag for codec opus in stream #0, codec not currently supported in container\r\n[out#0/segment @ 0000029ed6c0cec0] Could not write header (incorrect codec parameters ?): Invalid argument\r\n'
+[2026-01-08 19:14:44] Logger initialized.
+[2026-01-08 19:14:44] FFmpeg found in path.
+[2026-01-08 19:16:19] Logger initialized.
+[2026-01-08 19:16:19] FFmpeg found in path.
+[2026-01-08 19:20:48] Logger initialized.
+[2026-01-08 19:20:48] FFmpeg found in path.
+[2026-01-08 19:23:00] Logger initialized.
+[2026-01-08 19:23:00] FFmpeg found in path.
+[2026-01-08 19:29:15] Logger initialized.
+[2026-01-08 19:29:15] FFmpeg found in path.
+[2026-01-08 19:29:19] Logger initialized.
+[2026-01-08 19:29:19] FFmpeg found in path.
+[2026-01-08 20:20:06] Logger initialized.
+[2026-01-08 20:20:06] FFmpeg found in path.
+[2026-01-08 20:20:11] Logger initialized.
+[2026-01-08 20:20:11] FFmpeg found in path.
+[2026-01-08 21:00:38] Logger initialized.
+[2026-01-08 21:00:38] FFmpeg found in path.
+[2026-01-08 21:00:43] Logger initialized.
+[2026-01-08 21:00:43] FFmpeg found in path.
+[2026-01-08 21:05:59] Logger initialized.
+[2026-01-08 21:05:59] FFmpeg found in path.
+[2026-01-08 21:06:02] Logger initialized.
+[2026-01-08 21:06:03] FFmpeg found in path.
+[2026-01-08 21:24:27] Logger initialized.
+[2026-01-08 21:24:28] FFmpeg found in path.
+[2026-01-08 21:28:08] Logger initialized.
+[2026-01-08 21:28:08] FFmpeg found in path.

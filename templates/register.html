@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -100,6 +101,7 @@
     }
   </style>
 </head>
+
 <body>
   <nav class="navbar navbar-expand-lg navbar-light">
     <div class="container">
@@ -122,21 +124,24 @@
                 <label for="uname" class="form-label fw-semibold">
                   <i class="fas fa-user me-2"></i>Full Name
                 </label>
-                <input type="text" class="form-control form-control-lg rounded-3" id="uname" name="uname" placeholder="Enter your full name" required>
+                <input type="text" class="form-control form-control-lg rounded-3" id="uname" name="uname"
+                  placeholder="Enter your full name" required>
               </div>
 
               <div class="mb-4">
                 <label for="uemail" class="form-label fw-semibold">
                   <i class="fas fa-envelope me-2"></i>Email Address
                 </label>
-                <input type="email" class="form-control form-control-lg rounded-3" id="uemail" name="uemail" placeholder="Enter your email" required>
+                <input type="email" class="form-control form-control-lg rounded-3" id="uemail" name="uemail"
+                  placeholder="Enter your email" required>
               </div>
 
               <div class="mb-4">
                 <label for="upassword" class="form-label fw-semibold">
                   <i class="fas fa-lock me-2"></i>Password
                 </label>
-                <input type="password" class="form-control form-control-lg rounded-3" id="upassword" name="upassword" placeholder="Create a password" required>
+                <input type="password" class="form-control form-control-lg rounded-3" id="upassword" name="upassword"
+                  placeholder="Create a password" minlength="4" maxlength="8" required>
               </div>
 
               <button type="submit" class="btn btn-primary btn-lg w-100 mb-3 rounded-3">
@@ -156,4 +161,5 @@
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

@@ -169,6 +169,7 @@ def summarize_with_groq(text, system_prompt, model="llama-3.3-70b-versatile", ma
         "max_tokens": max_tokens
     }
 
+
     for attempt in range(retries):
         try:
             # Timeout: 120s is enough for one attempt. Don't wait 6 mins per request.
@@ -186,6 +187,9 @@ def summarize_with_groq(text, system_prompt, model="llama-3.3-70b-versatile", ma
             
             result = resp.json()
             if resp.status_code != 200:
+                # Handle invalid API key specifically
+                if resp.status_code == 401 or "invalid_api_key" in str(result):
+                    return "[Error: Invalid API Key. Please make sure GROQ_API_KEY is set correctly in your Render Environment Variables.]"
                 return f"[Error summarization] {result}"
             
             if "choices" not in result:
@@ -325,104 +329,141 @@ def audio_to_text(audio_file):
         logging.error(f"audio_to_text exception: {e}", exc_info=True)
         return ""
 
+
+
 def process_large_audio(audio_path, job_id=None):
     """
-    Process audio file by splitting it into chunks using ffmpeg (FAST).
+    Process audio file by splitting it into chunks using ffmpeg (FAST - STREAM COPY).
     Then transcribes in parallel.
     """
     import math
     import concurrent.futures
     import json
+    import glob
 
     full_transcript = []
-    # 15 minutes per chunk to minimize API calls count but keep files reasonable
-    # Groq whisper-large-v3 can handle 25MB. 15 mins at 32k-64k bitrate is well under 25MB.
-    # Reverted to 600 (10 mins) for safety. 20 mins was causing timeouts/failures.
+    # Groq whisper-large-v3 can handle 25MB.
+    # 600s (10m) of AAC ~ 128kbps is ~10MB. Safe.
     CHUNK_DURATION_SEC = 600
 
     try:
         print(f"Loading media file: {audio_path}")
         if job_id: JOBS[job_id]["status"] = "Checking audio duration..."
         
-        # Get duration using ffprobe
-        # ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 input.mp3
-        cmd_dur = [
-            "ffprobe", "-v", "error", 
-            "-show_entries", "format=duration", 
-            "-of", "default=noprint_wrappers=1:nokey=1", 
+        # Get duration and codec using ffprobe (JSON)
+        # ffprobe -v error -select_streams a:0 -show_entries stream=codec_name:format=duration -of json input
+        cmd_probe = [
+            "ffprobe", "-v", "error",
+            "-select_streams", "a:0",
+            "-show_entries", "stream=codec_name:format=duration",
+            "-of", "json",
             audio_path
         ]
-        result = subprocess.run(cmd_dur, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        
+        duration = 0
+        codec_name = "unknown"
+        
         try:
-            duration = float(result.stdout.strip())
-        except:
-            # Fallback if ffprobe fails or returns weirdness
-            print(f"ffprobe failed: {result.stderr}")
-            duration = 0
+            result = subprocess.run(cmd_probe, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            info = json.loads(result.stdout)
+            
+            if "streams" in info and info["streams"]:
+                codec_name = info["streams"][0].get("codec_name", "unknown")
+                
+            if "format" in info:
+                duration = float(info["format"].get("duration", 0))
+                
+        except Exception as e:
+             print(f"ffprobe failed: {e}")
+             # Fallback: try old method or just proceed with 0
+             pass
 
         file_size_mb = os.path.getsize(audio_path) / (1024 * 1024)
-        print(f"Total duration: {duration}s, Size: {file_size_mb:.2f}MB")
+        print(f"Total duration: {duration}s, Size: {file_size_mb:.2f}MB, Codec: {codec_name}")
 
-        if duration <= CHUNK_DURATION_SEC and file_size_mb < 25:
+        if duration > 0 and duration <= CHUNK_DURATION_SEC and file_size_mb < 24:
              log_debug("Duration is short and size is small, processing directly...")
              if job_id: JOBS[job_id]["status"] = "Transcribing..."
              return audio_to_text(audio_path)
 
-
-        # Split using ffmpeg segment
-        # ffmpeg -i input.mp3 -f segment -segment_time 600 -c copy output_%03d.mp3
-        # -c copy is instant but requires good keyframes. 
-        # For safety and compatibility with Whisper, re-encoding to mp3 specifically is safer if inputs vary.
-        # But we want speed. Let's try copy first? No, re-encoding is safer for timestamp accuracy in splitting.
-        # Actually -acodec copy is fine for mp3->mp3 usually.
-        # Let's use libmp3lame to ensure clean cut chunks at cost of a little CPU.
-        
-        if job_id: JOBS[job_id]["status"] = "Splitting audio (ffmpeg)..."
+        # Split using ffmpeg segment with STREAM COPY (NO RE-ENCODING)
+        if job_id: JOBS[job_id]["status"] = "Splitting audio (Fast Copy)..."
         print(f"Splitting into chunks of {CHUNK_DURATION_SEC}s...")
         
         base_name = audio_path.rsplit(".", 1)[0]
-        chunk_pattern = f"{base_name}_chunk_%03d.mp3"
         
-        # Using segment muxer
+        # Smart Extension Mapping for Stream Copy
+        # Groq supports: flac, mp3, mp4, mpeg, mpga, m4a, ogg, wav, webm
+        ext_map = {
+            "aac": "m4a",
+            "mp3": "mp3",
+            "opus": "webm",
+            "vorbis": "ogg",
+            "flac": "flac",
+            "pcm_s16le": "wav"
+        }
+        # Default to m4a if unknown, or maintain original ext if possible? 
+        # m4a is a safe bet for most modern stuff, but let's use map.
+        ext = ext_map.get(codec_name, "m4a")
+        
+        chunk_pattern = f"{base_name}_chunk_%03d.{ext}"
+        
+        # -vn: no video
+        # -c:a copy: copy audio header
+        # -map 0:a: map first audio stream
         cmd_split = [
-            "ffmpeg", "-i", audio_path, 
-            "-f", "segment", 
-            "-segment_time", str(CHUNK_DURATION_SEC), 
-            "-c:a", "libmp3lame", "-b:a", "64k",  # Re-encode to ensure compatible small chunks
-            "-y", "-loglevel", "error", 
+            "ffmpeg", "-i", audio_path,
+            "-f", "segment",
+            "-segment_time", str(CHUNK_DURATION_SEC),
+            "-vn", "-c:a", "copy",
+            "-reset_timestamps", "1",
+            "-map", "0:a",
+            "-y", "-loglevel", "error",
             chunk_pattern
         ]
-        # Note: -c copy is faster but can lead to "non-monotonic timestamps" issues for some players/parsers. 
-        # -b:a 64k ensures small size.
         
-        subprocess.run(cmd_split, check=True)
+        # FALLBACK: If copy fails (e.g. incompatible container), we might need re-encode.
+        res = subprocess.run(cmd_split, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if res.returncode != 0:
+            print(f"Stream copy failed ({res.stderr[:200]}), falling back to re-encode...")
+            log_debug(f"Stream copy failed, re-encoding. Error: {res.stderr[:200]}")
+            # Fallback to re-encode (original safe method)
+            ext = "mp3"
+            cmd_split = [
+                "ffmpeg", "-i", audio_path, 
+                "-f", "segment", 
+                "-segment_time", str(CHUNK_DURATION_SEC), 
+                "-vn", "-acodec", "libmp3lame", "-q:a", "4",
+                "-y", "-loglevel", "error", 
+                f"{base_name}_chunk_%03d.{ext}"
+            ]
+            subprocess.run(cmd_split, check=True)
+        
+        pattern_glob = f"{base_name}_chunk_*.{ext}"
         
         # Check generated files
-        chunk_files = []
-        # glob for the files
-        import glob
-        pattern_glob = f"{base_name}_chunk_*.mp3"
         found_chunks = sorted(glob.glob(pattern_glob))
-        
         print(f"Generated {len(found_chunks)} chunks.")
         
+        if not found_chunks:
+            return "[ERROR: No chunks generated]"
+
         # Parallel Transcription
-        if job_id: JOBS[job_id]["status"] = f"Transcribing {len(found_chunks)} chunks in parallel..."
+        if job_id: JOBS[job_id]["status"] = f"Transcribing {len(found_chunks)} chunks..."
         print("Starting parallel transcription...")
         
         results = [None] * len(found_chunks)
 
         def transcribe_chunk(index, filename):
-            print(f"DTO processing chunk {index+1}...")
+            # print(f"Processing chunk {index+1}...") 
             text = audio_to_text(filename)
-            # Cleanup immediately
             try:
                 os.remove(filename)
             except:
                 pass
             return index, text
 
-        # INCREASED WORKERS from 2 to 5 for speed
+        # 5 workers for speed
         with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
             future_to_chunk = {executor.submit(transcribe_chunk, i, f): i for i, f in enumerate(found_chunks)}
             for future in concurrent.futures.as_completed(future_to_chunk):
@@ -440,6 +481,7 @@ def process_large_audio(audio_path, job_id=None):
         print(err_msg)
         log_debug(err_msg)
         return f"[ERROR: {str(e)}]"
+
 
 # ---------------- YOUTUBE HELPERS ----------------
 def extract_video_id(youtube_url):
@@ -459,17 +501,16 @@ def get_transcript(video_id):
     return " ".join([entry['text'] for entry in transcript])
 
 def download_audio_from_youtube(youtube_url):
-    """Download best audio using yt_dlp and return local filename, or None on failure."""
+    """Download best audio (m4a/aac) directly using yt_dlp and return local filename, or None on failure."""
     import sys
     
-    # Use unique name to prevent collisions/overwrites
-    # Use .mp3 extension and -x flag to auto-convert whatever is downloaded
-    outname = f"yt_{uuid.uuid4().hex}.mp3"
-    log_debug(f"Starting download for {youtube_url} -> {outname}")
+    # Use unique name
+    outname = f"yt_{uuid.uuid4().hex}.m4a"
+    log_debug(f"Starting download (fast mode) for {youtube_url} -> {outname}")
 
     cmd = [
         sys.executable, "-m", "yt_dlp",
-        "-x", "--audio-format", "mp3",
+        "-f", "bestaudio[ext=m4a]/bestaudio", # Get m4a directly if possible
         "-o", outname,
         "--extractor-args", "youtube:player_client=android_creator",
         "--no-check-certificate",
@@ -477,8 +518,6 @@ def download_audio_from_youtube(youtube_url):
         "--quiet",
         youtube_url
     ]
-
-    # [CLOUD FIX] Removed cookies.txt usage to avoid Geo-Lock/IP Mismatch issues
 
     try:
         log_debug(f"Running command: {' '.join(cmd)}")
@@ -488,7 +527,6 @@ def download_audio_from_youtube(youtube_url):
             log_debug(f"yt-dlp failed with code {result.returncode}")
             log_debug(f"STDERR: {result.stderr}")
             print(f"yt-dlp stderr: {result.stderr}")
-            # Return None and the error message
             return None, result.stderr
             
         if os.path.exists(outname):
@@ -711,6 +749,10 @@ def add_users():
         if not email or not password:
             flash("Email and Password are required.", "danger")
             return redirect(url_for("add_users"))
+
+        if len(password) < 4 or len(password) > 8:
+            flash("Password must be between 4 and 8 characters long.", "warning")
+            return redirect(url_for("add_users"))
         
         # Validation for Registration too
         if any(char.isupper() for char in email):
@@ -897,6 +939,12 @@ def process_video_background(video_path, user_email, job_id):
             if not transcript:
                 JOBS[job_id]["status"] = "failed"
                 JOBS[job_id]["error"] = "Failed to transcribe video."
+                return
+
+            if transcript.startswith("[ERROR:"):
+                print(f"Job {job_id} failed with error: {transcript}")
+                JOBS[job_id]["status"] = "failed"
+                JOBS[job_id]["error"] = transcript
                 return
 
             JOBS[job_id]["status"] = "Summarizing..."
