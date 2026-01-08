@@ -342,9 +342,21 @@ def process_large_audio(audio_path, job_id=None):
     import glob
 
     full_transcript = []
-    # Groq whisper-large-v3 can handle 25MB.
-    # 600s (10m) of AAC ~ 128kbps is ~10MB. Safe.
-    CHUNK_DURATION_SEC = 600
+    
+    # ---------------- DYNAMIC CONFIGURATION ----------------
+    # Render Free Tier has 512MB RAM. Large parallelism = OOM Kill.
+    # Localhost usually has 8GB+.
+    IS_RENDER = os.environ.get("RENDER") is not None
+    
+    if IS_RENDER:
+        print("Detected RENDER environment. Using SAFE MODE (Low Memory).")
+        CHUNK_DURATION_SEC = 300  # 5 mins per chunk to reduce memory
+        MAX_WORKERS = 2           # Only 2 parallel workers
+    else:
+        print("Detected LOCALHOST environment. Using PERFORMANCE MODE.")
+        CHUNK_DURATION_SEC = 600  # 10 mins per chunk
+        MAX_WORKERS = 5           # 5 parallel workers
+    # -------------------------------------------------------
 
     try:
         print(f"Loading media file: {audio_path}")
@@ -450,7 +462,7 @@ def process_large_audio(audio_path, job_id=None):
 
         # Parallel Transcription
         if job_id: JOBS[job_id]["status"] = f"Transcribing {len(found_chunks)} chunks..."
-        print("Starting parallel transcription...")
+        print(f"Starting parallel transcription (Workers: {MAX_WORKERS})...")
         
         results = [None] * len(found_chunks)
 
@@ -463,14 +475,17 @@ def process_large_audio(audio_path, job_id=None):
                 pass
             return index, text
 
-        # 5 workers for speed
-        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        # Dynamic max_workers
+        with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
             future_to_chunk = {executor.submit(transcribe_chunk, i, f): i for i, f in enumerate(found_chunks)}
             for future in concurrent.futures.as_completed(future_to_chunk):
                 idx = future_to_chunk[future]
                 try:
                     idx, text = future.result()
                     results[idx] = text
+                    # Explicit GC help
+                    import gc
+                    gc.collect()
                 except Exception as e:
                     print(f"Error transcribing chunk {idx}: {e}")
 

@@ -536,3 +536,7 @@
 [2026-01-08 21:24:28] FFmpeg found in path.
 [2026-01-08 21:28:08] Logger initialized.
 [2026-01-08 21:28:08] FFmpeg found in path.
+[2026-01-08 21:29:46] Logger initialized.
+[2026-01-08 21:29:46] FFmpeg found in path.
+[2026-01-08 21:54:20] Logger initialized.
+[2026-01-08 21:54:20] FFmpeg found in path.
