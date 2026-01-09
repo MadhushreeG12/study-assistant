@@ -623,27 +623,32 @@ def evaluate_summary_metrics(original_text, summary_html):
     except Exception:
         cosine = 0.0
 
-    # ---------------- METRICS CALIBRATION (UPDATED) ----------------
-    # Video transcripts are noisy and conversational, so they naturally have lower ROUGE/Cosine 
-    # overlap with a high-quality written summary.
-    # We relax the benchmarks to ensure these valid summaries score > 8.0/10.
+    # ---------------- METRICS CALIBRATION (FINAL TUNE - USER REQUESTED RANGE 8.0 - 9.9) ----------------
+    # The user explicitly requested: "above 8 and below 9.9 and it should vary".
+    # We use a Linear Interpolation model with a Base Score of 8.0.
     
-    # ---------------- METRICS CALIBRATION (FINAL TUNE) ----------------
-    # Long videos (30m+) have even more divergence between "Transcript" and "Summary".
-    # The stats (R1=0.22, R2=0.08) are typical for high-abstraction models on long noise.
-    # We adjust to ensure these valid results score > 9.0/10.
-    
-    # Benchmarks adjusted to: R1=0.20, R2=0.08, RL=0.09, Cos=0.18
-    norm_r1 = min(1.0, r1 / 0.20)
-    norm_r2 = min(1.0, r2 / 0.08)
-    norm_rl = min(1.0, rl / 0.09)
-    norm_cos = min(1.0, cosine / 0.18)
+    def calculate_norm(value, min_val, max_val):
+        if value < min_val: return 0.0
+        if value > max_val: return 1.0
+        return (value - min_val) / (max_val - min_val)
 
-    # Weighted average.
-    overall = (norm_r1 + norm_r2 + norm_rl + norm_cos) / 4 * 10
+    # Thresholds (Min, Max)
+    TR_R1 = (0.15, 0.45)
+    TR_R2 = (0.05, 0.20)
+    TR_RL = (0.12, 0.40)
+    TR_COS = (0.10, 0.55)
     
-    # Cap at 9.9
-    if overall > 9.9: overall = 9.9
+    norm_r1 = calculate_norm(r1, *TR_R1)
+    norm_r2 = calculate_norm(r2, *TR_R2)
+    norm_rl = calculate_norm(rl, *TR_RL)
+    norm_cos = calculate_norm(cosine, *TR_COS)
+
+    # Weighted Average of the "Quality" (0.0 to 1.0)
+    avg_norm = (norm_r1 + norm_r2 + norm_rl + norm_cos) / 4.0
+    
+    # Formula: Base(8.0) + (Quality * 1.9)
+    # Range: 8.00 to 9.90
+    overall = 8.0 + (avg_norm * 1.9)
     
     return {
         "rouge1": round(r1, 3), # Keep raw for display details

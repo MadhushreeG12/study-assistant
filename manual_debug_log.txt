@@ -540,3 +540,225 @@
 [2026-01-08 21:29:46] FFmpeg found in path.
 [2026-01-08 21:54:20] Logger initialized.
 [2026-01-08 21:54:20] FFmpeg found in path.
+[2026-01-09 07:34:49] Logger initialized.
+[2026-01-09 07:34:49] FFmpeg found in path.
+[2026-01-09 07:34:55] Logger initialized.
+[2026-01-09 07:34:55] FFmpeg found in path.
+[2026-01-09 07:41:52] Logger initialized.
+[2026-01-09 07:41:52] FFmpeg found in path.
+[2026-01-09 07:44:44] Logger initialized.
+[2026-01-09 07:44:44] FFmpeg found in path.
+[2026-01-09 07:45:24] Logger initialized.
+[2026-01-09 07:45:24] FFmpeg found in path.
+[2026-01-09 07:47:36] Logger initialized.
+[2026-01-09 07:47:36] FFmpeg found in path.
+[2026-01-09 07:47:40] Logger initialized.
+[2026-01-09 07:47:40] FFmpeg found in path.
+[2026-01-09 07:51:09] Processing YouTube Video: fWjsdhR3z3c
+[2026-01-09 07:51:09] Attempting YouTube transcript API for fWjsdhR3z3c
+[2026-01-09 07:51:10] Official transcript failed: no element found: line 1, column 0
+[2026-01-09 07:51:10] Falling back to audio download...
+[2026-01-09 07:51:10] Starting download (fast mode) for https://youtu.be/fWjsdhR3z3c?si=9PAsgJ7CcEfpjOwE -> yt_7ba44f8369ba4ca7ac83b35caf31e033.m4a
+[2026-01-09 07:51:10] Running command: C:\Program Files\Python312\python.exe -m yt_dlp -f bestaudio[ext=m4a]/bestaudio -o yt_7ba44f8369ba4ca7ac83b35caf31e033.m4a --extractor-args youtube:player_client=android_creator --no-check-certificate --no-warnings --quiet https://youtu.be/fWjsdhR3z3c?si=9PAsgJ7CcEfpjOwE
+[2026-01-09 07:51:21] Download success: yt_7ba44f8369ba4ca7ac83b35caf31e033.m4a - Size: 10189903 bytes
+[2026-01-09 07:51:21] Audio downloaded: yt_7ba44f8369ba4ca7ac83b35caf31e033.m4a
+[2026-01-09 07:51:37] Transcript generated length: 10561
+[2026-01-09 07:51:39] Full summary generated. Length: 3194
+[2026-01-09 07:51:40] Metrics evaluated.
+[2026-01-09 07:51:41] TTS Audio generated: summary_fWjsdhR3z3c.mp3
+[2026-01-09 07:51:57] Processing YouTube Video: kqtD5dpn9C8
+[2026-01-09 07:51:57] Attempting YouTube transcript API for kqtD5dpn9C8
+[2026-01-09 07:51:58] Official transcript failed: no element found: line 1, column 0
+[2026-01-09 07:51:58] Falling back to audio download...
+[2026-01-09 07:51:58] Starting download (fast mode) for https://youtu.be/kqtD5dpn9C8?si=m304m2RuzXh-7aIB -> yt_650d30efa8504310bdc26d78ed22e11c.m4a
+[2026-01-09 07:51:58] Running command: C:\Program Files\Python312\python.exe -m yt_dlp -f bestaudio[ext=m4a]/bestaudio -o yt_650d30efa8504310bdc26d78ed22e11c.m4a --extractor-args youtube:player_client=android_creator --no-check-certificate --no-warnings --quiet https://youtu.be/kqtD5dpn9C8?si=m304m2RuzXh-7aIB
+[2026-01-09 07:52:13] Download success: yt_650d30efa8504310bdc26d78ed22e11c.m4a - Size: 58312794 bytes
+[2026-01-09 07:52:13] Audio downloaded: yt_650d30efa8504310bdc26d78ed22e11c.m4a
+[2026-01-09 07:53:17] Transcript generated length: 51444
+[2026-01-09 07:53:35] Full summary generated. Length: 5885
+[2026-01-09 07:53:38] Metrics evaluated.
+[2026-01-09 07:53:40] TTS Audio generated: summary_kqtD5dpn9C8.mp3
+[2026-01-09 07:53:57] Processing YouTube Video: mAtkPQO1FcA
+[2026-01-09 07:53:57] Attempting YouTube transcript API for mAtkPQO1FcA
+[2026-01-09 07:53:57] Official transcript failed: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=mAtkPQO1FcA! This is most likely caused by:
+
+No transcripts were found for any of the requested language codes: ['en']
+
+For this video (mAtkPQO1FcA) transcripts are available in the following languages:
+
+(MANUALLY CREATED)
+None
+
+(GENERATED)
+ - hi ("Hindi (auto-generated)")[TRANSLATABLE]
+
+(TRANSLATION LANGUAGES)
+ - ab ("Abkhazian")
+ - aa ("Afar")
+ - af ("Afrikaans")
+ - ak ("Akan")
+ - sq ("Albanian")
+ - am ("Amharic")
+ - ar ("Arabic")
+ - hy ("Armenian")
+ - as ("Assamese")
+ - ay ("Aymara")
+ - az ("Azerbaijani")
+ - bn ("Bangla")
+ - ba ("Bashkir")
+ - eu ("Basque")
+ - be ("Belarusian")
+ - bho ("Bhojpuri")
+ - bs ("Bosnian")
+ - br ("Breton")
+ - bg ("Bulgarian")
+ - my ("Burmese")
+ - ca ("Catalan")
+ - ceb ("Cebuano")
+ - zh-Hans ("Chinese (Simplified)")
+ - zh-Hant ("Chinese (Traditional)")
+ - co ("Corsican")
+ - hr ("Croatian")
+ - cs ("Czech")
+ - da ("Danish")
+ - dv ("Divehi")
+ - nl ("Dutch")
+ - dz ("Dzongkha")
+ - en ("English")
+ - eo ("Esperanto")
+ - et ("Estonian")
+ - ee ("Ewe")
+ - fo ("Faroese")
+ - fj ("Fijian")
+ - fil ("Filipino")
+ - fi ("Finnish")
+ - fr ("French")
+ - gaa ("Ga")
+ - gl ("Galician")
+ - lg ("Ganda")
+ - ka ("Georgian")
+ - de ("German")
+ - el ("Greek")
+ - gn ("Guarani")
+ - gu ("Gujarati")
+ - ht ("Haitian Creole")
+ - ha ("Hausa")
+ - haw ("Hawaiian")
+ - iw ("Hebrew")
+ - hi ("Hindi")
+ - hmn ("Hmong")
+ - hu ("Hungarian")
+ - is ("Icelandic")
+ - ig ("Igbo")
+ - id ("Indonesian")
+ - iu ("Inuktitut")
+ - ga ("Irish")
+ - it ("Italian")
+ - ja ("Japanese")
+ - jv ("Javanese")
+ - kl ("Kalaallisut")
+ - kn ("Kannada")
+ - kk ("Kazakh")
+ - kha ("Khasi")
+ - km ("Khmer")
+ - rw ("Kinyarwanda")
+ - ko ("Korean")
+ - kri ("Krio")
+ - ku ("Kurdish")
+ - ky ("Kyrgyz")
+ - lo ("Lao")
+ - la ("Latin")
+ - lv ("Latvian")
+ - ln ("Lingala")
+ - lt ("Lithuanian")
+ - lua ("Luba-Lulua")
+ - luo ("Luo")
+ - lb ("Luxembourgish")
+ - mk ("Macedonian")
+ - mg ("Malagasy")
+ - ms ("Malay")
+ - ml ("Malayalam")
+ - mt ("Maltese")
+ - gv ("Manx")
+ - mi ("Māori")
+ - mr ("Marathi")
+ - mn ("Mongolian")
+ - mfe ("Morisyen")
+ - ne ("Nepali")
+ - new ("Newari")
+ - nso ("Northern Sotho")
+ - no ("Norwegian")
+ - ny ("Nyanja")
+ - oc ("Occitan")
+ - or ("Odia")
+ - om ("Oromo")
+ - os ("Ossetic")
+ - pam ("Pampanga")
+ - ps ("Pashto")
+ - fa ("Persian")
+ - pl ("Polish")
+ - pt ("Portuguese")
+ - pt-PT ("Portuguese (Portugal)")
+ - pa ("Punjabi")
+ - qu ("Quechua")
+ - ro ("Romanian")
+ - rn ("Rundi")
+ - ru ("Russian")
+ - sm ("Samoan")
+ - sg ("Sango")
+ - sa ("Sanskrit")
+ - gd ("Scottish Gaelic")
+ - sr ("Serbian")
+ - crs ("Seselwa Creole French")
+ - sn ("Shona")
+ - sd ("Sindhi")
+ - si ("Sinhala")
+ - sk ("Slovak")
+ - sl ("Slovenian")
+ - so ("Somali")
+ - st ("Southern Sotho")
+ - es ("Spanish")
+ - su ("Sundanese")
+ - sw ("Swahili")
+ - ss ("Swati")
+ - sv ("Swedish")
+ - tg ("Tajik")
+ - ta ("Tamil")
+ - tt ("Tatar")
+ - te ("Telugu")
+ - th ("Thai")
+ - bo ("Tibetan")
+ - ti ("Tigrinya")
+ - to ("Tongan")
+ - ts ("Tsonga")
+ - tn ("Tswana")
+ - tum ("Tumbuka")
+ - tr ("Turkish")
+ - tk ("Turkmen")
+ - uk ("Ukrainian")
+ - ur ("Urdu")
+ - ug ("Uyghur")
+ - uz ("Uzbek")
+ - ve ("Venda")
+ - vi ("Vietnamese")
+ - war ("Waray")
+ - cy ("Welsh")
+ - fy ("Western Frisian")
+ - wo ("Wolof")
+ - xh ("Xhosa")
+ - yi ("Yiddish")
+ - yo ("Yoruba")
+ - zu ("Zulu")
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+[2026-01-09 07:53:57] Falling back to audio download...
+[2026-01-09 07:53:57] Starting download (fast mode) for https://youtu.be/mAtkPQO1FcA?si=UmBOH7xvMpSXXLJ9 -> yt_d9483b00f92841b8bdf455f82eb54780.m4a
+[2026-01-09 07:53:57] Running command: C:\Program Files\Python312\python.exe -m yt_dlp -f bestaudio[ext=m4a]/bestaudio -o yt_d9483b00f92841b8bdf455f82eb54780.m4a --extractor-args youtube:player_client=android_creator --no-check-certificate --no-warnings --quiet https://youtu.be/mAtkPQO1FcA?si=UmBOH7xvMpSXXLJ9
+[2026-01-09 07:54:04] Download success: yt_d9483b00f92841b8bdf455f82eb54780.m4a - Size: 5045904 bytes
+[2026-01-09 07:54:04] Audio downloaded: yt_d9483b00f92841b8bdf455f82eb54780.m4a
+[2026-01-09 07:54:04] Duration is short and size is small, processing directly...
+[2026-01-09 07:54:15] Transcript generated length: 4804
+[2026-01-09 07:54:17] Full summary generated. Length: 2858
+[2026-01-09 07:54:17] Metrics evaluated.
+[2026-01-09 07:54:18] TTS Audio generated: summary_mAtkPQO1FcA.mp3
