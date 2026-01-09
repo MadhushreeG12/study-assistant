@@ -762,3 +762,71 @@ If you are sure that the described cause is not responsible for this error and t
 [2026-01-09 07:54:17] Full summary generated. Length: 2858
 [2026-01-09 07:54:17] Metrics evaluated.
 [2026-01-09 07:54:18] TTS Audio generated: summary_mAtkPQO1FcA.mp3
+[2026-01-09 07:56:04] Processing YouTube Video: uWYPVz_i7W4
+[2026-01-09 07:56:04] Attempting YouTube transcript API for uWYPVz_i7W4
+[2026-01-09 07:56:05] Official transcript failed: no element found: line 1, column 0
+[2026-01-09 07:56:05] Falling back to audio download...
+[2026-01-09 07:56:05] Starting download (fast mode) for https://youtu.be/uWYPVz_i7W4?si=JPP4TJz9WFfeXGZF -> yt_4110880dd3194ef2af954cb5fa166bb5.m4a
+[2026-01-09 07:56:05] Running command: C:\Program Files\Python312\python.exe -m yt_dlp -f bestaudio[ext=m4a]/bestaudio -o yt_4110880dd3194ef2af954cb5fa166bb5.m4a --extractor-args youtube:player_client=android_creator --no-check-certificate --no-warnings --quiet https://youtu.be/uWYPVz_i7W4?si=JPP4TJz9WFfeXGZF
+[2026-01-09 07:56:17] Download success: yt_4110880dd3194ef2af954cb5fa166bb5.m4a - Size: 34044917 bytes
+[2026-01-09 07:56:17] Audio downloaded: yt_4110880dd3194ef2af954cb5fa166bb5.m4a
+[2026-01-09 07:57:10] Transcript generated length: 21239
+[2026-01-09 07:57:14] Full summary generated. Length: 4281
+[2026-01-09 07:57:15] Metrics evaluated.
+[2026-01-09 07:57:17] TTS Audio generated: summary_uWYPVz_i7W4.mp3
+[2026-01-09 08:07:25] Logger initialized.
+[2026-01-09 08:07:25] FFmpeg found in path.
+[2026-01-09 08:07:29] Logger initialized.
+[2026-01-09 08:07:29] FFmpeg found in path.
+[2026-01-09 10:51:03] Logger initialized.
+[2026-01-09 10:51:03] FFmpeg found in path.
+[2026-01-09 10:51:08] Logger initialized.
+[2026-01-09 10:51:08] FFmpeg found in path.
+[2026-01-09 10:54:52] Logger initialized.
+[2026-01-09 10:54:52] FFmpeg found in path.
+[2026-01-09 10:55:37] Logger initialized.
+[2026-01-09 10:55:37] FFmpeg found in path.
+[2026-01-09 10:55:48] Logger initialized.
+[2026-01-09 10:55:48] FFmpeg found in path.
+[2026-01-09 10:57:40] Logger initialized.
+[2026-01-09 10:57:40] FFmpeg found in path.
+[2026-01-09 10:58:10] Logger initialized.
+[2026-01-09 10:58:10] FFmpeg found in path.
+[2026-01-09 10:58:32] Logger initialized.
+[2026-01-09 10:58:32] FFmpeg found in path.
+[2026-01-09 10:59:30] Logger initialized.
+[2026-01-09 10:59:30] FFmpeg found in path.
+[2026-01-09 11:06:11] Processing YouTube Video: kqtD5dpn9C8
+[2026-01-09 11:06:11] Attempting YouTube transcript API for kqtD5dpn9C8
+[2026-01-09 11:06:16] Official transcript failed: no element found: line 1, column 0
+[2026-01-09 11:06:16] Falling back to audio download...
+[2026-01-09 11:06:16] Starting download (fast mode) for https://youtu.be/kqtD5dpn9C8?si=m304m2RuzXh-7aIB -> yt_b4d62222925547908a2985e47ffa2c99.m4a
+[2026-01-09 11:06:16] Running command: C:\Program Files\Python312\python.exe -m yt_dlp -f bestaudio[ext=m4a]/bestaudio -o yt_b4d62222925547908a2985e47ffa2c99.m4a --extractor-args youtube:player_client=android_creator --no-check-certificate --no-warnings --quiet https://youtu.be/kqtD5dpn9C8?si=m304m2RuzXh-7aIB
+[2026-01-09 11:10:34] Logger initialized.
+[2026-01-09 11:10:34] FFmpeg found in path.
+[2026-01-09 11:10:38] Logger initialized.
+[2026-01-09 11:10:38] FFmpeg found in path.
+[2026-01-09 11:12:04] Processing YouTube Video: kqtD5dpn9C8
+[2026-01-09 11:12:04] Attempting YouTube transcript API for kqtD5dpn9C8
+[2026-01-09 11:12:06] Official transcript failed: no element found: line 1, column 0
+[2026-01-09 11:12:06] Falling back to audio download...
+[2026-01-09 11:12:06] Starting download (fast mode) for https://youtu.be/kqtD5dpn9C8?si=m304m2RuzXh-7aIB -> yt_0125cff332634312803ce598d46ac0d0.m4a
+[2026-01-09 11:12:06] Running command: C:\Program Files\Python312\python.exe -m yt_dlp -f bestaudio[ext=m4a]/bestaudio -o yt_0125cff332634312803ce598d46ac0d0.m4a --extractor-args youtube:player_client=android_creator --no-check-certificate --no-warnings --quiet https://youtu.be/kqtD5dpn9C8?si=m304m2RuzXh-7aIB
+[2026-01-09 11:16:12] Download success: yt_0125cff332634312803ce598d46ac0d0.m4a - Size: 58312794 bytes
+[2026-01-09 11:16:12] Audio downloaded: yt_0125cff332634312803ce598d46ac0d0.m4a
+[2026-01-09 11:16:58] Transcript generated length: 51444
+[2026-01-09 11:17:09] Processing YouTube Video: TBWX97e1E9g
+[2026-01-09 11:17:09] Attempting YouTube transcript API for TBWX97e1E9g
+[2026-01-09 11:17:11] Official transcript failed: no element found: line 1, column 0
+[2026-01-09 11:17:11] Falling back to audio download...
+[2026-01-09 11:17:11] Starting download (fast mode) for https://youtu.be/TBWX97e1E9g?si=267FpvhOBHPsDGMY -> yt_e5cd31cfa74b4cd39126ae0c4138a503.m4a
+[2026-01-09 11:17:11] Running command: C:\Program Files\Python312\python.exe -m yt_dlp -f bestaudio[ext=m4a]/bestaudio -o yt_e5cd31cfa74b4cd39126ae0c4138a503.m4a --extractor-args youtube:player_client=android_creator --no-check-certificate --no-warnings --quiet https://youtu.be/TBWX97e1E9g?si=267FpvhOBHPsDGMY
+[2026-01-09 11:17:18] Full summary generated. Length: 6258
+[2026-01-09 11:17:22] Metrics evaluated.
+[2026-01-09 11:17:24] TTS Audio generated: summary_kqtD5dpn9C8.mp3
+[2026-01-09 11:17:27] Download success: yt_e5cd31cfa74b4cd39126ae0c4138a503.m4a - Size: 17176867 bytes
+[2026-01-09 11:17:27] Audio downloaded: yt_e5cd31cfa74b4cd39126ae0c4138a503.m4a
+[2026-01-09 11:17:56] Transcript generated length: 17932
+[2026-01-09 11:18:14] Full summary generated. Length: 3292
+[2026-01-09 11:18:15] Metrics evaluated.
+[2026-01-09 11:18:17] TTS Audio generated: summary_TBWX97e1E9g.mp3

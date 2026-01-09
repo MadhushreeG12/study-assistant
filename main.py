@@ -580,6 +580,22 @@ def generate_flashcards(summary):
       ]
     }}
     """
+    MAX_RETRIES = 2
+    
+    # helper to clean json
+    def clean_and_parse_json(content):
+        import json, re
+        # Remove markdown
+        content = re.sub(r"```json", "", content)
+        content = re.sub(r"```", "", content)
+        content = content.strip()
+        # Find valid JSON object
+        match = re.search(r"\{.*\}", content, re.DOTALL)
+        if match:
+            return json.loads(match.group(0))
+        return None
+
+    # Try 70B first (High Quality)
     try:
         resp = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
@@ -588,21 +604,29 @@ def generate_flashcards(summary):
             temperature=0.2
         )
         content = resp.choices[0].message.content
-        
-        # Robust JSON extraction
-        import json, re
-        # Remove potential markdown code fences
-        content = re.sub(r"```json", "", content)
-        content = re.sub(r"```", "", content)
-        content = content.strip()
-
-        # Find valid JSON object
-        match = re.search(r"\{.*\}", content, re.DOTALL)
-        if match:
-            return json.loads(match.group(0))
-        return {"error": "Invalid JSON from flashcard generator"}
+        data = clean_and_parse_json(content)
+        if data: 
+            return data
     except Exception as e:
-        return {"error": str(e)}
+        print(f"70B Flashcard Gen failed: {e}. Switching to 8B...")
+
+    # Fallback to 8B (High Speed/Reliability)
+    try:
+        # 8B is faster and less likely to be rate limited on free/fast tiers
+        resp = client.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=2000,
+            temperature=0.2
+        )
+        content = resp.choices[0].message.content
+        data = clean_and_parse_json(content)
+        if data:
+            return data
+        return {"error": "Failed to parse JSON from 8B model"}
+        
+    except Exception as e:
+        return {"error": f"All models failed: {str(e)}"}
 
 # ---------------- METRICS ----------------
 def evaluate_summary_metrics(original_text, summary_html):

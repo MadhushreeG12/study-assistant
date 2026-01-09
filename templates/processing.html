@@ -1,68 +1,281 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Processing - ExplainIT AI</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
+      font-family: 'Poppins', sans-serif;
       background: linear-gradient(135deg, #E8D5F2 0%, #DCD1E8 50%, #C9B8E0 100%);
       min-height: 100vh;
       display: flex;
-      align-items: center;
       justify-content: center;
-      font-family: 'Poppins', sans-serif;
+      align-items: center;
+      padding: 20px;
     }
 
-    .card {
+    /* Main Glass Container */
+    .main-container {
+      display: flex;
+      width: 100%;
+      max-width: 1400px;
+      height: 90vh;
       background: rgba(255, 255, 255, 0.9);
-      border-radius: 20px;
+      border-radius: 30px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+      border: 4px solid #6B5B95;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: linear-gradient(180deg, #6B7BC4 0%, #5D6BA8 100%);
+      padding: 30px 20px;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 40px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-label {
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 1px;
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 10px;
+    }
+
+    .history-list {
+      flex: 1;
+      overflow-y: auto;
+      margin-right: -10px;
+      padding-right: 10px;
+    }
+
+    .history-item {
+      padding: 12px 15px;
+      border-radius: 12px;
+      color: rgba(255, 255, 255, 0.9);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 5px;
+    }
+
+    .history-item:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      transform: translateX(5px);
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      background: #F8F9FA;
       padding: 40px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      color: #5D6BA8;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      background: white;
+      padding: 8px 15px;
+      border-radius: 50px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .user-avatar {
+      width: 35px;
+      height: 35px;
+      background: linear-gradient(135deg, #6B7BC4, #A17BC4);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+    }
+
+    .btn-logout {
+      color: #dc3545;
+      border: 1px solid #dc3545;
+      background: transparent;
+      padding: 6px 15px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+
+    .btn-logout:hover {
+      background: #dc3545;
+      color: white;
+    }
+
+    /* Processing Card Specifics */
+    .processing-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    .process-card {
+      background: white;
+      padding: 50px;
+      border-radius: 30px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
       text-align: center;
-      max-width: 500px;
-      width: 90%;
+      max-width: 600px;
+      width: 100%;
     }
 
     .spinner-border {
-      width: 3rem;
-      height: 3rem;
-      color: #667eea;
+      width: 4rem;
+      height: 4rem;
+      color: #764ba2;
+      /* Match theme */
     }
 
     .progress {
-      height: 20px;
+      height: 15px;
       border-radius: 10px;
-      margin-top: 20px;
+      margin-top: 30px;
+      background-color: #e9ecef;
+      overflow: hidden;
     }
 
     .progress-bar {
       background: linear-gradient(90deg, #667eea, #764ba2);
       transition: width 0.5s ease;
     }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 3px;
+    }
   </style>
 </head>
 
 <body>
-  <div class="card">
-    <h2 class="mb-4">Processing Video</h2>
-    <div class="spinner-border mb-3" role="status">
-      <span class="visually-hidden">Loading...</span>
-    </div>
-    <p class="lead text-muted" id="statusText">Initializing...</p>
 
-    <div class="progress">
-      <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"
-        id="progressBar"></div>
+  <div class="main-container">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="logo">
+        <i class="fas fa-book-open"></i> ExplainIT AI
+      </div>
+
+      <div class="nav-label">Your History</div>
+      <!-- History list populated via JS -->
+      <div id="historyList" class="history-list">
+        <!-- Items go here -->
+      </div>
     </div>
-    <p class="mt-3 small text-muted">This may take a few minutes for large videos. Please do not close this tab.</p>
+
+    <!-- Main Content -->
+    <div class="main-content">
+
+      <!-- Header -->
+      <div class="header">
+        <h1>Processing Video...</h1>
+        <div class="header-right">
+          <!-- Simplified header for processing state -->
+          <a href="/starter" class="btn btn-outline-secondary btn-sm rounded-pill"><i
+              class="fas fa-arrow-left me-1"></i> Back to Home</a>
+        </div>
+      </div>
+
+      <!-- Processing Status Area -->
+      <div class="processing-container">
+        <div class="process-card">
+          <div class="spinner-border mb-4" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+
+          <h3 class="fw-bold text-dark mb-2">Analyzing Content</h3>
+          <p class="text-muted mb-4" id="statusText">Initializing background processor...</p>
+
+          <div class="progress">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"
+              id="progressBar"></div>
+          </div>
+
+          <div class="mt-4 p-3 bg-light rounded text-start">
+            <p class="small text-muted mb-0"><i class="fas fa-info-circle me-1"></i> large videos may take a few
+              minutes. You can leave this page; the job will continue in the background.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
   </div>
 
   <script>
+    // Job ID from Flask
     const jobId = "{{ job_id }}";
 
+    // Standard Polling Logic
     function checkStatus() {
       fetch(`/status/${jobId}`)
         .then(response => response.json())
@@ -71,30 +284,32 @@
 
           // Update progress bar based on status (approximate)
           let progress = 10;
-          if (data.status.includes("Processing chunk")) {
-            progress = 40;
+          if (data.status.includes("Checking audio")) {
+            progress = 15;
+          } else if (data.status.includes("Splitting audio")) {
+            progress = 25;
+          } else if (data.status.includes("Transcribing")) {
+            progress = 45;
           } else if (data.status.includes("Summarizing")) {
-            progress = 70;
-          } else if (data.status.includes("Generating Audio")) {
-            progress = 90;
+            progress = 75;
+          } else if (data.status.includes("Generating Flashcards")) {
+            progress = 85;
+          } else if (data.status.includes("Saving")) {
+            progress = 95;
           } else if (data.status === "completed") {
             progress = 100;
           } else if (data.status === "failed") {
-            document.getElementById('statusText').innerText = "Processing Failed: " + (data.error || "Unknown error");
-            document.querySelector('.spinner-border').classList.remove('spinner-border'); // Stop spinner
-            document.querySelector('.spinner-border').innerHTML = '<i class="fas fa-times-circle text-danger" style="font-size: 3rem;"></i>';
+            handleFailure(data.error);
             return;
           } else if (data.status === "unknown") {
-            // Job lost (likely server restart due to OOM)
-            document.getElementById('statusText').innerText = "Job Lost! (Server likely restarted/crashed). Please try a smaller file.";
-            document.querySelector('.spinner-border').classList.remove('spinner-border');
-            document.querySelector('.spinner-border').innerHTML = '<i class="fas fa-exclamation-triangle text-warning" style="font-size: 3rem;"></i>';
+            handleFailure("Job tracking lost (server restart).");
             return;
           }
 
           document.getElementById('progressBar').style.width = progress + "%";
 
           if (data.status === "completed") {
+            // Redirect to result page
             window.location.href = `/history/${data.result_id}`;
           } else {
             setTimeout(checkStatus, 2000); // Poll every 2 seconds
@@ -106,9 +321,44 @@
         });
     }
 
-    // Start polling
-    checkStatus();
+    function handleFailure(msg) {
+      document.getElementById('statusText').innerText = "Processing Failed: " + (msg || "Unknown error");
+      document.getElementById('statusText').classList.add("text-danger");
+      document.querySelector('.spinner-border').classList.remove('spinner-border');
+      // Change icon?
+      document.getElementById('progressBar').classList.add("bg-danger");
+    }
+
+    // Sidebar History Loading (Shared Logic)
+    function loadHistory() {
+      fetch("/history")
+        .then((r) => r.json())
+        .then((data) => {
+          const list = document.getElementById("historyList");
+          list.innerHTML = "";
+          if (!data.history || data.history.length === 0) {
+            list.innerHTML = "<div style='color: rgba(255,255,255,0.5); font-size: 0.9rem; margin-top: 10px;'>No history yet.</div>";
+            return;
+          }
+          data.history.forEach((item) => {
+            let div = document.createElement("div");
+            div.className = "history-item";
+            div.innerHTML = `<i class="fas fa-${item.type === 'pdf' ? 'file-pdf' : item.type === 'video' ? 'video' : 'youtube'} me-2"></i> ${item.title}`;
+            div.title = item.title;
+            div.onclick = () => (window.location.href = "/history/" + item.id);
+            list.appendChild(div);
+          });
+        })
+        .catch(console.error);
+    }
+
+    // Initialize
+    window.onload = function () {
+      checkStatus();
+      loadHistory();
+    };
   </script>
+
 </body>
 
 </html>
