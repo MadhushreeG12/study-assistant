@@ -830,3 +830,9 @@ If you are sure that the described cause is not responsible for this error and t
 [2026-01-09 11:18:14] Full summary generated. Length: 3292
 [2026-01-09 11:18:15] Metrics evaluated.
 [2026-01-09 11:18:17] TTS Audio generated: summary_TBWX97e1E9g.mp3
+[2026-01-09 12:09:37] Logger initialized.
+[2026-01-09 12:09:37] FFmpeg found in path.
+[2026-01-12 22:51:14] Logger initialized.
+[2026-01-12 22:51:14] FFmpeg found in path.
+[2026-01-12 22:51:18] Logger initialized.
+[2026-01-12 22:51:18] FFmpeg found in path.
