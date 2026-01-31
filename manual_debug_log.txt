@@ -836,3 +836,7 @@ If you are sure that the described cause is not responsible for this error and t
 [2026-01-12 22:51:14] FFmpeg found in path.
 [2026-01-12 22:51:18] Logger initialized.
 [2026-01-12 22:51:18] FFmpeg found in path.
+[2026-01-31 17:53:13] Logger initialized.
+[2026-01-31 17:53:13] Logger initialized.
+[2026-01-31 17:53:13] FFmpeg found in path.
+[2026-01-31 17:53:13] FFmpeg found in path.

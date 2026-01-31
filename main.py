@@ -512,7 +512,15 @@ def extract_video_id(youtube_url):
 
 def get_transcript(video_id):
     """Try official transcript via youtube_transcript_api; raises if not available."""
-    transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['en'])
+    # check for cookies.txt in current directory
+    cookies_file = "cookies.txt"
+    if os.path.exists(cookies_file):
+        log_debug(f"Using cookies.txt for transcript fetch: {video_id}")
+        transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['en'], cookies=cookies_file)
+    else:
+        log_debug(f"No cookies.txt found. Trying direct fetch: {video_id}")
+        transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['en'])
+    
     return " ".join([entry['text'] for entry in transcript])
 
 def download_audio_from_youtube(youtube_url):
