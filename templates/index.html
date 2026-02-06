@@ -442,7 +442,8 @@
     const uploadText = document.getElementById("uploadText");
 
     if (dropArea) {
-      dropArea.addEventListener("click", () => videoInput.click());
+      // dropArea.addEventListener("click", () => videoInput.click()); // REMOVED: Label handles this natively
+
 
       videoInput.addEventListener("change", () => {
         if (videoInput.files.length > 0) {

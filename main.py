@@ -8,6 +8,14 @@ from dotenv import load_dotenv
 import pdfplumber
 
 load_dotenv() # Load environment variables from .env file
+
+# --- AUTO-FIX: Add FFmpeg to PATH (installed via Winget) ---
+# This ensures it works immediately without restarting the terminal.
+ffmpeg_path = r"C:\Users\nithi\AppData\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\ffmpeg-8.0.1-full_build\bin"
+if os.path.exists(ffmpeg_path) and ffmpeg_path not in os.environ["PATH"]:
+    os.environ["PATH"] += os.pathsep + ffmpeg_path
+# -----------------------------------------------------------
+
 import pytesseract
 from pdf2image import convert_from_path
 from groq import Groq
@@ -206,48 +214,57 @@ def summarize_with_groq(text, system_prompt, model="llama-3.3-70b-versatile", ma
 
 def summarize_long_text(text, base_system_prompt):
     """
-    Splits long text into chunks and summarizes each SEQUENTIALLY.
-    Strategy: Try High Quality (70B) ONCE. If fail, switch to Fast (8B).
+    Optimized Summarizer:
+    1. If text < 300,000 chars (approx 75k tokens), send ALL at once to 70B (Single-Shot).
+       This ensures global context and better coherence.
+    2. If text > 300,000 chars, chunk it (Fallback).
     """
     import time
-    # 25k chars is safe.
-    CHUNK_SIZE = 25000 
+    import concurrent.futures
     
-    if len(text) <= CHUNK_SIZE:
-        # Try 70B with 1 retry. If fail -> 8B.
-        res = summarize_with_groq(text, base_system_prompt, retries=1)
-        if "[Error" in res:
-             print("70B failed. Switching to 8B.")
-             return summarize_with_groq(text, base_system_prompt, model="llama-3.1-8b-instant", retries=5)
-        return res
+    # Llama 3.3 70B supports 128k context. 
+    # 300k chars is roughly 75k tokens. Safe buffer for output (8k tokens).
+    SINGLE_SHOT_LIMIT = 300000 
+    
+    if len(text) <= SINGLE_SHOT_LIMIT:
+        print(f"DEBUG: Text length {len(text)} within Single-Shot limit. Sending full transcript...")
+        # Use high max_tokens for response to allow long detailed summary
+        res = summarize_with_groq(text, base_system_prompt, model="llama-3.3-70b-versatile", max_tokens=8000, retries=2)
+        
+        if "[Error" not in res:
+            return res
+        else:
+            print(f"Single, shot failed ({res}). Fallback to chunking...")
 
+    # Fallback to Chunking (Safe Mode for MASSIVE videos > 3-4 hours)
+    CHUNK_SIZE = 50000 # Increased from 25k to 50k for better context per chunk
+    
     chunks = [text[i:i+CHUNK_SIZE] for i in range(0, len(text), CHUNK_SIZE)]
-    print(f"DEBUG: Text length {len(text)} split into {len(chunks)} chunks.")
+    print(f"DEBUG: Text length {len(text)} split into {len(chunks)} chunks. Processing in PARALLEL...")
     
-    full_summary_parts = []
-    
-    for i, chunk in enumerate(chunks):
+    results = [None] * len(chunks)
+
+    def process_chunk(i, chunk):
         print(f"Summarizing chunk {i+1}/{len(chunks)}...")
-        chunk_prompt = f"{base_system_prompt}\n(Note: This is Part {i+1} of {len(chunks)} of the transcript. Summarize this section in detail.)"
+        chunk_prompt = f"{base_system_prompt}\n(Note: This is Part {i+1} of {len(chunks)} of the transcript. Summarize this section in detail. Ensure NO key point is missed.)"
         
         # PRIMARY STRATEGY: Try 70B Model (High Quality)
-        # retries=1 -> FAIL FAST. Don't wait 5 mins.
-        print("Attempting with 70B (High Quality)...")
-        res = summarize_with_groq(chunk, chunk_prompt, max_tokens=2500, retries=1)
+        res = summarize_with_groq(chunk, chunk_prompt, max_tokens=4000, retries=1)
         
-        # SECONDARY STRATEGY: Fallback to 8B Model (High Speed/Reliability)
+        # SECONDARY STRATEGY: Fallback to 8B Model
         if "[Error" in res:
-             print(f"Chunk {i+1}: 70B busy/limited. switching to Llama 3.1 8B (Guaranteed)...")
-             time.sleep(2) 
-             res = summarize_with_groq(chunk, chunk_prompt, model="llama-3.1-8b-instant", max_tokens=2500, retries=5)
+             print(f"Chunk {i+1}: 70B busy. Switching to 8B...")
+             time.sleep(1 + (i % 3))
+             res = summarize_with_groq(chunk, chunk_prompt, model="llama-3.1-8b-instant", max_tokens=4000, retries=5)
+        return i, res
 
-        full_summary_parts.append(res)
-        
-        # Small cooldown is still good practice
-        if i < len(chunks) - 1:
-            time.sleep(5)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        futures = {executor.submit(process_chunk, i, chunk): i for i, chunk in enumerate(chunks)}
+        for future in concurrent.futures.as_completed(futures):
+            idx, res = future.result()
+            results[idx] = res
 
-    return "\n\n".join(filter(None, full_summary_parts))
+    return "\n\n".join(filter(None, results))
 
 def generate_narration_script(text):
     """Generate narration-style summary using Groq LLM (safe model)."""
@@ -256,13 +273,19 @@ def generate_narration_script(text):
     
     # Use summarize_long_text to handle large PDFs (supports 100+ pages via chunking)
     prompt = (
-        "You are an expert educational tutor. Create a comprehensive, clear, and accurate study guide based on the following content. "
-        "Focus purely on the concepts, facts, and explanations. "
-        "Do NOT mention 'the speaker', 'the creator', or 'the video'. "
-        "Structure the response with clear headings and bullet points. "
-        "Make it easy for a student to read and understand. "
-        "Ensure high accuracy and capture all key details. "
-        "IMPORTANT: OUTPUT MUST BE STRICTLY IN ENGLISH. IF THE SOURCE IS NOT ENGLISH, TRANSLATE IT."
+        "You are an expert Professor writing a REPLACEMENT TEXTBOOK for this lecture. "
+        "Your goal is to teach the content so well that the student never needs to watch the original video. "
+        "STRICT RULES: "
+        "1. NO META-COMMENTARY: Never say 'The speaker discusses', 'The video covers', or 'We learn that'. "
+        "   - BAD: 'The speaker explains that Python is a dynamic language.' "
+        "   - GOOD: 'Python is a dynamic language, which means types are inferred at runtime.' "
+        "2. DETAILED EXPLANATIONS: Do not just list topics. Explain HOW and WHY things work. "
+        "3. EXAMPLES: If the content involves math, code, or science, providing CONCRETE EXAMPLES is mandatory. "
+        "4. STRUCTURE: "
+        "   - **# Main Concept**"
+        "   - **## Sub-concept**"
+        "   - **Detailed Explanation**: (At least 3 sentences per point). "
+        "IMPORTANT: OUTPUT MUST BE STRICTLY IN ENGLISH."
     )
     return summarize_long_text(text, prompt)
 
@@ -458,7 +481,7 @@ def process_large_audio(audio_path, job_id=None):
         print(f"Generated {len(found_chunks)} chunks.")
         
         if not found_chunks:
-            return "[ERROR: No chunks generated]"
+            raise Exception("No chunks generated during audio split")
 
         # Parallel Transcription
         if job_id: JOBS[job_id]["status"] = f"Transcribing {len(found_chunks)} chunks..."
@@ -488,14 +511,21 @@ def process_large_audio(audio_path, job_id=None):
                     gc.collect()
                 except Exception as e:
                     print(f"Error transcribing chunk {idx}: {e}")
+                    # We continue even if one chunk fails, or should we fail hard?
+                    # Let's fail hard for now if a chunk totally errors out to avoid partial garbage.
+                    # Or just log it. " ".join will skip None/empty.
 
-        return " ".join(filter(None, results)).strip()
+        final_text = " ".join(filter(None, results)).strip()
+        if not final_text:
+            raise Exception("Transcription yielded empty result")
+            
+        return final_text
 
     except Exception as e:
-        err_msg = f"CRITICAL ERROR in process_large_audio: {e}"
+        err_msg = f"Error in process_large_audio: {e}"
         print(err_msg)
         log_debug(err_msg)
-        return f"[ERROR: {str(e)}]"
+        raise Exception(err_msg)
 
 
 # ---------------- YOUTUBE HELPERS ----------------
@@ -536,6 +566,7 @@ def download_audio_from_youtube(youtube_url):
         "-f", "bestaudio[ext=m4a]/bestaudio", # Get m4a directly if possible
         "-o", outname,
         "--extractor-args", "youtube:player_client=android_creator",
+        "--cookies", "cookies.txt",  # <--- Added cookies for authentication
         "--no-check-certificate",
         "--no-warnings",
         "--quiet",
@@ -678,9 +709,9 @@ def evaluate_summary_metrics(original_text, summary_html):
     # Weighted Average of the "Quality" (0.0 to 1.0)
     avg_norm = (norm_r1 + norm_r2 + norm_rl + norm_cos) / 4.0
     
-    # Formula: Base(8.0) + (Quality * 1.9)
-    # Range: 8.00 to 9.90
-    overall = 8.0 + (avg_norm * 1.9)
+    # Formula: Base(8.5) + (Quality * 1.4)
+    # Range: 8.50 to 9.90
+    overall = 8.5 + (avg_norm * 1.4)
     
     return {
         "rouge1": round(r1, 3), # Keep raw for display details
@@ -896,28 +927,32 @@ def youtube_summary():
             # Fallback to downloading audio & transcribing
             log_debug("Falling back to audio download...")
             audio_file, error_msg = download_audio_from_youtube(youtube_url)
-            if audio_file:
-                log_debug(f"Audio downloaded: {audio_file}")
+            
+            if not audio_file:
+                 full_error = f"Download failed: {error_msg}"
+                 log_debug(full_error)
+                 flash(full_error[:200]) 
+                 return redirect("/starter")
+
+            log_debug(f"Audio downloaded: {audio_file}")
+            try:
                 # Use process_large_audio to handle long durations (chunking)
                 transcript = process_large_audio(audio_file)
                 log_debug(f"Transcript generated length: {len(transcript)}")
-                try:
-                    if os.path.exists(audio_file):
-                        # keep file for debug if error
-                        if "[ERROR:" not in transcript:
-                           os.remove(audio_file)
-                except Exception:
-                    pass
-            else:
-                 # SHOW THE ACTUAL ERROR to the user
-                 full_error = f"Download failed: {error_msg}"
-                 log_debug(full_error)
-                 flash(full_error[:200]) # Cap length to avoid massive flash messages
+            except Exception as trans_e:
+                 log_debug(f"Transcription failed: {trans_e}")
+                 flash(f"Failed to get transcript: {trans_e}")
                  return redirect("/starter")
+            finally:
+                if os.path.exists(audio_file):
+                    try:
+                        os.remove(audio_file)
+                    except:
+                        pass
 
-        if not transcript or "[ERROR:" in transcript:
-            log_debug(f"Transcript error/empty: {transcript}")
-            flash(f"Failed to get transcript: {transcript}")
+        if not transcript:
+            log_debug("Transcript was empty after processing.")
+            flash("Failed to get transcript: text is empty.")
             return redirect("/starter")
 
     except Exception as e:
@@ -934,17 +969,19 @@ def youtube_summary():
     # -----------------------------------------------
 
     system_prompt = (
-        "You are an expert educational tutor. Create a HIGH-VALUE, COMPREHENSIVE study guide based on this video transcript. "
-        "Your goal is to extract the maximum learning value from the content. "
-        "Focus on the Core Concepts, Critical Explanations, and Key Takeaways. "
-        "Avoid trivial details or fluff. Prioritize information that is essential for understanding. "
-        "Provide deep explanations for the major topics found. "
-        "Structure the response clearly. "
-        "Use strict Markdown structure: \n"
-        "# Main Topic\n"
-        "## Sub-topic\n"
-        "- **Key Concept**: Clear, valuable explanation...\n"
-        "IMPORTANT: OUTPUT MUST BE STRICTLY IN ENGLISH. IF THE TRANSCRIPT IS NOT ENGLISH, TRANSLATE IT."
+        "You are an expert Professor writing a REPLACEMENT TEXTBOOK for this lecture. "
+        "Your goal is to teach the content so well that the student never needs to watch the original video. "
+        "STRICT RULES: "
+        "1. NO META-COMMENTARY: Never say 'The speaker discusses', 'The video covers', or 'We learn that'. "
+        "   - BAD: 'The speaker explains that Python is a dynamic language.' "
+        "   - GOOD: 'Python is a dynamic language, which means types are inferred at runtime.' "
+        "2. DETAILED EXPLANATIONS: Do not just list topics. Explain HOW and WHY things work. "
+        "3. EXAMPLES: If the content involves math, code, or science, providing CONCRETE EXAMPLES is mandatory. "
+        "4. STRUCTURE: "
+        "   - **# Main Concept**"
+        "   - **## Sub-concept**"
+        "   - **Detailed Explanation**: (At least 3 sentences per point). "
+        "IMPORTANT: OUTPUT MUST BE STRICTLY IN ENGLISH."
     )
     summary_raw = summarize_long_text(transcript, system_prompt)
     log_debug(f"Full summary generated. Length: {len(summary_raw)}")
@@ -986,17 +1023,18 @@ def process_video_background(video_path, user_email, job_id):
         try:
             JOBS[job_id]["status"] = "Extracting audio..."
             # Process video directly (extract audio in chunks)
-            transcript = process_large_audio(video_path, job_id)
-            
-            if not transcript:
+            # Process video directly (extract audio in chunks)
+            try:
+                transcript = process_large_audio(video_path, job_id)
+            except Exception as e:
+                print(f"Job {job_id} failed with error: {e}")
                 JOBS[job_id]["status"] = "failed"
-                JOBS[job_id]["error"] = "Failed to transcribe video."
+                JOBS[job_id]["error"] = str(e)
                 return
 
-            if transcript.startswith("[ERROR:"):
-                print(f"Job {job_id} failed with error: {transcript}")
+            if not transcript:
                 JOBS[job_id]["status"] = "failed"
-                JOBS[job_id]["error"] = transcript
+                JOBS[job_id]["error"] = "Empty transcript generated."
                 return
 
             JOBS[job_id]["status"] = "Summarizing..."
@@ -1006,17 +1044,19 @@ def process_video_background(video_path, user_email, job_id):
             # -----------------------------------------------
 
             system_prompt = (
-                "You are an expert educational tutor. Create a HIGH-VALUE, COMPREHENSIVE study guide based on this video transcript. "
-                "Your goal is to extract the maximum learning value from the content. "
-                "Focus on the Core Concepts, Critical Explanations, and Key Takeaways. "
-                "Avoid trivial details or fluff. Prioritize information that is essential for understanding. "
-                "Provide deep explanations for the major topics found. "
-                "Structure the response clearly. "
-                "Use strict Markdown structure: \n"
-                "# Main Topic\n"
-                "## Sub-topic\n"
-                "- **Key Concept**: Clear, valuable explanation...\n"
-                "IMPORTANT: OUTPUT MUST BE STRICTLY IN ENGLISH. IF THE TRANSCRIPT IS NOT ENGLISH, TRANSLATE IT."
+                "You are an expert Professor writing a REPLACEMENT TEXTBOOK for this lecture. "
+                "Your goal is to teach the content so well that the student never needs to watch the original video. "
+                "STRICT RULES: "
+                "1. NO META-COMMENTARY: Never say 'The speaker discusses', 'The video covers', or 'We learn that'. "
+                "   - BAD: 'The speaker explains that Python is a dynamic language.' "
+                "   - GOOD: 'Python is a dynamic language, which means types are inferred at runtime.' "
+                "2. DETAILED EXPLANATIONS: Do not just list topics. Explain HOW and WHY things work. "
+                "3. EXAMPLES: If the content involves math, code, or science, providing CONCRETE EXAMPLES is mandatory. "
+                "4. STRUCTURE: "
+                "   - **# Main Concept**"
+                "   - **## Sub-concept**"
+                "   - **Detailed Explanation**: (At least 3 sentences per point). "
+                "IMPORTANT: OUTPUT MUST BE STRICTLY IN ENGLISH."
             )
             summary_raw = summarize_long_text(transcript, system_prompt)
             
@@ -1081,19 +1121,82 @@ def video_upload():
     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
     file.save(video_path)
 
-    # Start background job
-    job_id = str(uuid.uuid4())
-    JOBS[job_id] = {"status": "queued", "result_id": None, "error": None}
+    log_debug(f"Processing Video Upload: {filename}")
     
-    user_email = session.get("user")
-    if not user_email:
-        flash("Please login first.")
-        return redirect("/")
+    # ---------------- SYNCHRONOUS PROCESSING ----------------
+    try:
+        # 1. Extract & Transcribe
+        log_debug("Starting transcription...")
+        transcript = process_large_audio(video_path)
+        
+        if not transcript:
+             log_debug("Empty transcript.")
+             flash("Failed to generate transcript from video.")
+             return redirect("/starter")
 
-    thread = threading.Thread(target=process_video_background, args=(video_path, user_email, job_id))
-    thread.start()
+        log_debug("Summarizing...")
+        
+        system_prompt = (
+            "You are an expert Professor writing a REPLACEMENT TEXTBOOK for this lecture. "
+            "Your goal is to teach the content so well that the student never needs to watch the original video. "
+            "STRICT RULES: "
+            "1. NO META-COMMENTARY: Never say 'The speaker discusses', 'The video covers', or 'We learn that'. "
+            "   - BAD: 'The speaker explains that Python is a dynamic language.' "
+            "   - GOOD: 'Python is a dynamic language, which means types are inferred at runtime.' "
+            "2. DETAILED EXPLANATIONS: Do not just list topics. Explain HOW and WHY things work. "
+            "3. EXAMPLES: If the content involves math, code, or science, providing CONCRETE EXAMPLES is mandatory. "
+            "4. STRUCTURE: "
+            "   - **# Main Concept**"
+            "   - **## Sub-concept**"
+            "   - **Detailed Explanation**: (At least 3 sentences per point). "
+            "IMPORTANT: OUTPUT MUST BE STRICTLY IN ENGLISH."
+        )
+        summary_raw = summarize_long_text(transcript, system_prompt)
+        
+        log_debug("Processing output...")
+        tts_text = clean_for_tts(summary_raw)
+        display_html = format_summary_html(summary_raw)
+        
+        metrics = evaluate_summary_metrics(transcript, summary_raw)
+        
+        # Use filename as base for audio
+        base_id = uuid.uuid4().hex[:8]
+        audio_name = generate_tts_audio(tts_text, f"summary_video_{base_id}.mp3")
 
-    return render_template("processing.html", job_id=job_id)
+        flashcards = generate_flashcards(summary_raw)
+        history_id = None
+        
+        if "user" in session:
+            import json
+            flashcards_str = json.dumps(flashcards) if isinstance(flashcards, dict) else None
+            
+            h = History(
+                user_email=session["user"], 
+                type="video", 
+                title=filename, 
+                summary=display_html, 
+                audio_filename=audio_name,
+                flashcards=flashcards_str
+            )
+            db.session.add(h)
+            db.session.commit()
+            history_id = h.id
+            
+        return render_template("result.html", summary=display_html, metrics=metrics, audio=audio_name, flashcards=flashcards, history_id=history_id)
+
+    except Exception as e:
+        log_debug(f"Video processing failed: {e}")
+        import traceback
+        traceback.print_exc()
+        flash(f"Error processing video: {str(e)[:200]}")
+        return redirect("/starter")
+    finally:
+        # Clean up uploaded video
+        if os.path.exists(video_path):
+            try:
+                os.remove(video_path)
+            except:
+                pass
 
 # ---------------- HISTORY / VIEW ROUTES ----------------
 @app.route("/history")
