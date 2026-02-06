@@ -763,26 +763,45 @@ def clean_for_tts(text):
 
 def format_summary_html(text):
     """Convert basic Markdown to HTML for display."""
-    # Bold
+    
+    # 1. Handle Bold (**text**) -> <b>text</b>
+    # We do this first so inline bolding works.
     text = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', text)
-    # Lists (simple dash to bullet) - Just wrap in lines for now as template calls | safe
+    
     lines = text.split('\n')
     html_lines = []
+    
     for line in lines:
         line = line.strip()
         if not line:
             html_lines.append("<br>")
             continue
-        if line.startswith("-") or line.startswith("*"):
-            clean_line = line.lstrip("-* ").strip()
-            # Apply bolding inside lines
-            clean_line = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', clean_line)
-            html_lines.append(f"<li>{clean_line}</li>")
-        elif line.startswith("#"):
-             # Header
-             html_lines.append(f"<h4>{line.lstrip('#').strip()}</h4>")
+
+        # 2. Check for Headers (even if they are inside <b> tags due to step 1)
+        # Example: "<b>## Sub-concept</b>" should become "<h4>Sub-concept</h4>"
+        
+        # Create a "clean" version just to check for the # pattern
+        clean_content = line.replace("<b>", "").replace("</b>", "").strip()
+        
+        if clean_content.startswith("#"):
+            # Count hashes
+            hash_count = len(clean_content) - len(clean_content.lstrip('#'))
+            title = clean_content.lstrip('#').strip()
+            
+            # Map # -> h3, ## -> h4, etc. (Adjust based on your UI hierarchy)
+            h_tag = f"h{min(hash_count + 2, 6)}" 
+            html_lines.append(f"<{h_tag} class='mt-3 mb-2' style='color: #444;'>{title}</{h_tag}>")
+            
+        elif line.startswith("-") or line.startswith("*"):
+            # List items
+            content = line.lstrip("-* ").strip()
+            # Ensure bolding inside list items is preserved (it is, because of step 1)
+            html_lines.append(f"<li class='mb-1'>{content}</li>")
+            
         else:
-             html_lines.append(f"{line}<br>")
+            # Regular text
+            html_lines.append(f"<p>{line}</p>")
+
     return "".join(html_lines)
 
 # ---------------- ROUTES: index/login/pdf/youtube/video ----------------
