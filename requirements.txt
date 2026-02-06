@@ -9,7 +9,7 @@ yt_dlp
 scikit-learn
 rouge_score
 flask-sqlalchemy
-pyttsx3
+gTTS
 moviepy<2.0
 gunicorn
 python-dotenv

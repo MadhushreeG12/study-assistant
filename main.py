@@ -26,7 +26,9 @@ from flask_sqlalchemy import SQLAlchemy
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from rouge_score import rouge_scorer
-import pyttsx3
+from sklearn.metrics.pairwise import cosine_similarity
+from rouge_score import rouge_scorer
+from gtts import gTTS
 import subprocess
 import shutil
 import uuid
@@ -722,15 +724,10 @@ def evaluate_summary_metrics(original_text, summary_html):
     }
 
 # ---------------- TTS ----------------
+# ---------------- TTS ----------------
 def generate_tts_audio(text, filename):
-    """Generate TTS audio using pyttsx3 and return the filename (or None)."""
+    """Generate TTS audio using gTTS (Google TTS) and return the filename."""
     try:
-        import pythoncom
-        pythoncom.CoInitialize()
-        engine = pyttsx3.init()
-        engine.setProperty("rate", 150)
-        engine.setProperty("volume", 0.9)
-
         # Use absolute path to ensure we know exactly where it goes
         abs_audio_folder = os.path.join(app.root_path, app.config["AUDIO_FOLDER"])
         os.makedirs(abs_audio_folder, exist_ok=True)
@@ -738,16 +735,17 @@ def generate_tts_audio(text, filename):
         filepath = os.path.join(abs_audio_folder, filename)
         print(f"[TTS] Saving audio to: {filepath}")
 
-        engine.save_to_file(text, filepath)
-        engine.runAndWait()
+        # gTTS generation
+        tts = gTTS(text=text, lang='en', slow=False)
+        tts.save(filepath)
         
         if os.path.exists(filepath):
             print(f"[TTS] File successfully created: {filepath} (Size: {os.path.getsize(filepath)} bytes)")
+            return filename
         else:
             print(f"[TTS] ERROR: File was NOT created at {filepath}")
+            return None
 
-        pythoncom.CoUninitialize()
-        return filename
     except Exception as e:
         print("TTS error:", e)
         return None
